@@ -1,4 +1,5 @@
 const fs = require('fs')
+const { resolve } = require('path')
 
 const Contributor = require('../models/contributor')
 
@@ -13,8 +14,10 @@ module.exports = {
         // obtain all structure files
 
         // get all versions
+        rqftvs = await parseVersions()
 
         // determine, which versions have not yet been fully parsed
+        await updateVersions(rqftvs)
 
         // for each not fully parsed version: determine new extractions
 
@@ -41,5 +44,27 @@ updateContributors = async function(contributors) {
             })
             await dbcont.save()
         }
+    }
+}
+
+parseVersions = function() {
+    return new Promise((resolve, reject) => {
+        var rqftvs = []
+        fs.readdir(datapath + 'versions', (err, files) => {
+            if (err) throw reject();
+          
+            for (const file of files) {
+                json = readJson('versions/'+file)
+                rqftvs.push(json)
+            }
+            resolve(rqftvs)
+        });
+    });
+}
+
+updateVersions = async function(versions) {
+    for(const version of versions) {
+        console.log(version)
+        
     }
 }
