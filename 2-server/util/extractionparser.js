@@ -1,7 +1,9 @@
+const { strictEqual } = require('assert')
 const fs = require('fs')
 const { resolve } = require('path')
 
 const Contributor = require('../models/contributor')
+const Version = require('../models/version')
 
 const datapath = './../0-data/'
 
@@ -64,7 +66,15 @@ parseVersions = function() {
 
 updateVersions = async function(versions) {
     for(const version of versions) {
-        console.log(version)
+        // check if the version already exists in the current database
+        const v = await Version.find({
+            ontology: version['version']['ontology'],
+            taxonomy: version['version']['taxonomy'],
+            content: version['version']['content']
+        })
         
+        if(v.length == 0) {
+            console.log('Version v' + version['version']['ontology'] + '.' + version['version']['taxonomy'] + '.' + version['version']['content'] + ' does not yet exist in the database.')
+        }
     }
 }
