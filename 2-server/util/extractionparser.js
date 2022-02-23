@@ -200,7 +200,7 @@ parseExtraction = async function(extid, extraction) {
         }
     }
 
-    datasetKeys = []
+    var datasetKeys = []
     if(Object.keys(extraction).indexOf('data sets') > -1) {
         for(const ds of extraction['data sets']) {
             var dataset = await Dataset.findOne({id: ds['ID']});
@@ -213,9 +213,9 @@ parseExtraction = async function(extid, extraction) {
                     id: ds['ID'],
                     reference: reference._id,
                     embedded: embedded,
-                    description: ds['Definition'],
+                    description: ds['Description'],
                     origin: ds['Origin'],
-                    groundtruthannotators: ds['Ground Truch Annotators'],
+                    groundtruthannotators: ds['Ground Truth Annotator'],
                     size: ds['Size'],
                     granularity: ds['Granularity'],
                     accessibility: ds['Accessibility'],
@@ -224,6 +224,40 @@ parseExtraction = async function(extid, extraction) {
                 await dataset.save();
             }
             datasetKeys.push(dataset._id);
+        }
+    }
+
+    var approachKeys = []
+    if(Object.keys(extraction).indexOf('approaches') > -1) {
+        for(const ap of extraction['approaches']) {
+            var approach = await Approach.findOne({id: ap['ID']});
+
+            if(approach == null) {
+                console.log('Approach [' + ap['ID'] + '] is not included in the database yet.')
+                const embedded = await getIDsOfEmbedded(ap['Detecting'])
+                
+                var structure = {
+                    id: ap['ID'],
+                    reference: reference._id,
+                    detecting: embedded, 
+                    description: ap['Name'],
+                    acronym: ap['Short'],
+                    type: ap['Type'],
+                    accessibility: ap['Accessibility'],
+                    empiricalmethod: ap['Empirical method applied'],
+                    pracitionersinvolved: ap['Practitioners involved'],
+                    sourcelink: ds['Source Link'],
+                    necessaryinformation: ds['Necessary Information']
+                }
+                for(const release of ap['Release']) {
+                    const code = release.toLowerCase().replace(' ', '');
+                    structure[code] = true;
+                }
+                
+                approach = new Approach(structure);
+                await approach.save();
+            }
+            approachKeys.push(approach._id);
         }
     }
 

@@ -1,6 +1,11 @@
 const mongoose = require('mongoose')
 
 const schema = new mongoose.Schema({
+    id: {
+        type: String,
+        required: true,
+        unique: true,
+    },
     reference: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Reference'
