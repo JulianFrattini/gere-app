@@ -32,56 +32,67 @@ const schema = new mongoose.Schema({
     ambiguity: {
         type: String,
         enum: ['+', '', '-', '?'],
+        default: '?',
         required: true
     },
     completeness: {
         type: String,
         enum: ['+', '', '-', '?'],
+        default: '?',
         required: true
     },
     complexity: {
         type: String,
         enum: ['+', '', '-', '?'],
+        default: '?',
         required: true
     },
     consistency: {
         type: String,
         enum: ['+', '', '-', '?'],
+        default: '?',
         required: true
     },
     correctness: {
         type: String,
         enum: ['+', '', '-', '?'],
+        default: '?',
         required: true
     },
     redundancy: {
         type: String,
         enum: ['+', '', '-', '?'],
+        default: '?',
         required: true
     },
     relevancy: {
         type: String,
         enum: ['+', '', '-', '?'],
+        default: '?',
         required: true
     },
     reusability: {
         type: String,
         enum: ['+', '', '-', '?'],
+        default: '?',
         required: true
     },
     traceability: {
         type: String,
         enum: ['+', '', '-', '?'],
+        default: '?',
         required: true
     },
     understandability: {
         type: String,
         enum: ['+', '', '-', '?'],
+        default: '?',
         required: true
     },
     verifiability: {
         type: String,
         enum: ['+', '', '-', '?'],
+        default: '?',
         required: true
     }
 });

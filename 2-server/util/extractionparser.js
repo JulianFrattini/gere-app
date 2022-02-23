@@ -4,6 +4,8 @@ const Contributor = require('../models/contributor')
 const Version = require('../models/version')
 const Reference = require('../models/reference')
 const Extraction = require('../models/extraction')
+const Factor = require('../models/factor')
+const Description = require('../models/description')
 
 const datapath = './../0-data/'
 
@@ -146,15 +148,72 @@ getExtractionWhichSpecifiesReference = function(extractions, refkey) {
 parseExtraction = async function(extid, extraction) {
     const contributor = await Contributor.find({acronym: extraction['extractor']})
 
+    const refkey = Object.keys(extraction['reference']).indexOf('indicator') > -1 ? extraction['reference']['indicator'] : extraction['reference']
+    const reference = await Reference.findOne({refkey: refkey})
+
+    // check all descriptions
+    descriptionKeys = []
+    factorKeys = []
+    if(Object.keys(extraction).indexOf('descriptions') > -1) {
+        for(const desc of extraction['descriptions']) {
+            var description = await Description.findOne({id: desc['ID']});
+
+            if(description == null) {
+                console.log('Description [' + desc['ID'] + '] is not included in the database yet.')
+                description = new Description({
+                    id: desc['ID'],
+                    reference: reference._id,
+                    definition: desc['Definition'],
+                    impact: desc['Impact'],
+                    empiricalevidence: desc['Empirical Evidence'],
+                    pracitionersinvolved: desc['Practitioners Involved']
+                });
+                await description.save();
+
+                // check if the quality attribute of the description is already contained in the database
+                var factor = await Factor.findOne({id: desc['QA-ID']});
+                if(factor == null) {
+                    // obtain the quality factor that is explained by the description (match the ID of the factor to the QA-ID of the description)
+                    const qf = extraction['quality attributes'].filter(f => f['ID']==desc['QA-ID'])[0]
+                    console.log('Quality Factor ' + qf['Name'] + ' is not included in the database yet.')
+
+                    factor = new Factor({
+                        id: qf['ID'],
+                        name: qf['Name'],
+                        reference: [reference._id],
+                        linguisticcomplexity: qf['Linguistic Complexity'],
+                        scope: qf['Scope']
+                    });
+                    await factor.save();
+                }
+                await Factor.findOneAndUpdate(
+                    { _id: factor._id },
+                    { $push: { descriptions: description._id } }
+                )
+
+                factorKeys.push(factor._id)
+            }
+            descriptionKeys.push(description._id)
+        }
+    }
+
     if(Object.keys(extraction).indexOf('quality attributes') > -1) {
         for(const qf of extraction['quality attributes']) {
-            console.log(qf['Name'])
+            var factor = await Factor.findOne({id: qf['ID']});
+
+            if(factor == null) {
+
+            }
         }
     }
 
     var extraction = new Extraction({
         extid: extid,
-        extractor: contributor[0]._id
+        extractor: contributor[0]._id,
+        factors: factorKeys,
+        descriptions: descriptionKeys
     });
     //console.log(extraction);
+    // await extraction.save()
+    return extraction._id;
 }
