@@ -2,10 +2,13 @@ const fs = require('fs')
 
 const Contributor = require('../models/contributor')
 const Version = require('../models/version')
-const Reference = require('../models/reference')
 const Extraction = require('../models/extraction')
+
+const Reference = require('../models/reference')
 const Factor = require('../models/factor')
 const Description = require('../models/description')
+const Dataset = require('../models/dataset')
+const Approach = require('../models/approach')
 
 const datapath = './../0-data/'
 
@@ -175,7 +178,7 @@ parseExtraction = async function(extid, extraction) {
                 if(factor == null) {
                     // obtain the quality factor that is explained by the description (match the ID of the factor to the QA-ID of the description)
                     const qf = extraction['quality attributes'].filter(f => f['ID']==desc['QA-ID'])[0]
-                    console.log('Quality Factor ' + qf['Name'] + ' is not included in the database yet.')
+                    console.log('Quality Factor ' + qf['Name'] + ' [' + qf['ID'] + '] is not included in the database yet.')
 
                     factor = new Factor({
                         id: qf['ID'],
@@ -197,13 +200,30 @@ parseExtraction = async function(extid, extraction) {
         }
     }
 
-    if(Object.keys(extraction).indexOf('quality attributes') > -1) {
-        for(const qf of extraction['quality attributes']) {
-            var factor = await Factor.findOne({id: qf['ID']});
+    datasetKeys = []
+    if(Object.keys(extraction).indexOf('data sets') > -1) {
+        for(const ds of extraction['data sets']) {
+            var dataset = await Dataset.findOne({id: ds['ID']});
 
-            if(factor == null) {
-
+            if(dataset == null) {
+                console.log('Dataset [' + ds['ID'] + '] is not included in the database yet.')
+                embedded = await getIDsOfEmbedded(ds['Embedded Information'])
+                
+                dataset = new Dataset({
+                    id: ds['ID'],
+                    reference: reference._id,
+                    embedded: embedded,
+                    description: ds['Definition'],
+                    origin: ds['Origin'],
+                    groundtruthannotators: ds['Ground Truch Annotators'],
+                    size: ds['Size'],
+                    granularity: ds['Granularity'],
+                    accessibility: ds['Accessibility'],
+                    sourcelink: ds['Source Link']
+                });
+                await dataset.save();
             }
+            datasetKeys.push(dataset._id);
         }
     }
 
@@ -211,9 +231,19 @@ parseExtraction = async function(extid, extraction) {
         extid: extid,
         extractor: contributor[0]._id,
         factors: factorKeys,
-        descriptions: descriptionKeys
+        descriptions: descriptionKeys,
+        datasets: datasetKeys
     });
     //console.log(extraction);
     // await extraction.save()
     return extraction._id;
+}
+
+getIDsOfEmbedded = async function(descIDs) {
+    var result = [];
+    for(const did of descIDs) {
+        const description = await Description.findOne({id: did})
+        result.push(description._id);
+    }
+    return result;
 }
