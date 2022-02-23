@@ -1,11 +1,9 @@
-const { strictEqual } = require('assert')
 const fs = require('fs')
-const { resolve } = require('path')
 
 const Contributor = require('../models/contributor')
 const Version = require('../models/version')
 const Reference = require('../models/reference')
-const reference = require('../models/reference')
+const Extraction = require('../models/extraction')
 
 const datapath = './../0-data/'
 
@@ -19,7 +17,8 @@ module.exports = {
 
         // get all versions
         rqftvs = await parseFiles('versions')
-        rqftex = await parseFiles('extractions')
+        rqftex = await parseFilesToMap('extractions')
+        //console.log(rqftex)
 
         // determine, which versions have not yet been fully parsed
         await updateVersions(rqftvs, rqftex)
@@ -67,6 +66,21 @@ parseFiles = function(folder) {
     });
 }
 
+parseFilesToMap = function(folder) {
+    return new Promise((resolve, reject) => {
+        var result = {}
+        fs.readdir(datapath + folder, (err, files) => {
+            if (err) throw reject();
+          
+            for (const file of files) {
+                json = readJson(folder+'/'+file)
+                result[file.split('.')[0]] = json
+            }
+            resolve(result)
+        });
+    });
+}
+
 updateVersions = async function(versions, extractions) {
     // TODO order versions by timestamp
 
@@ -103,18 +117,44 @@ updateVersions = async function(versions, extractions) {
                 } else {
                     reference = ref[0]
                 }
+            }
 
-                console.log(reference)
+            for(const ek of allextractions) {
+                var extraction = null;
+                const ext = await Extraction.find({extid: ek})
+
+                if(ext.length == 0) {
+                    e = await readJson('extractions/' + ek + '.json')
+                    parseExtraction(ek, extractions[ek])
+                } else {
+                    extraction = ext[0]
+                }
             }
         }
     }
 }
 
 getExtractionWhichSpecifiesReference = function(extractions, refkey) {
-    for(const extraction of extractions) {
+    for(const extraction of Object.values(extractions)) {
         if(Object.keys(extraction['reference']).indexOf('indicator') > -1) {
             return extraction['reference']
         }
     }
     return null
+}
+
+parseExtraction = async function(extid, extraction) {
+    const contributor = await Contributor.find({acronym: extraction['extractor']})
+
+    if(Object.keys(extraction).indexOf('quality attributes') > -1) {
+        for(const qf of extraction['quality attributes']) {
+            console.log(qf['Name'])
+        }
+    }
+
+    var extraction = new Extraction({
+        extid: extid,
+        extractor: contributor[0]._id
+    });
+    //console.log(extraction);
 }
