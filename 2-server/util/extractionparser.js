@@ -3,6 +3,7 @@ const fs = require('fs')
 const Contributor = require('../models/contributor')
 const Version = require('../models/version')
 const Extraction = require('../models/extraction')
+const RefMap = require('../models/refmap')
 
 const Reference = require('../models/reference')
 const Factor = require('../models/factor')
@@ -43,13 +44,13 @@ readJson = function(filename) {
 updateContributors = async function(contributors) {
     // check for each contributor if they are already contained in the database
     for(const contributor of contributors) {
-        var dbcont = await Contributor.findOne({acronym: contributor['ID']})
+        var dbcont = await Contributor.findOne({acronym: contributor['acronym']})
         
         // add the contributor if it does not yet exist
         if (dbcont == null) {
             dbcont = new Contributor({
-                name: contributor['Name'],
-                acronym: contributor['ID']
+                name: contributor['name'],
+                acronym: contributor['acronym']
             })
             await dbcont.save()
         }
@@ -91,20 +92,21 @@ updateVersions = async function(versions, extractions) {
 
     for(const version of versions) {
         // check if the version already exists in the current database
-        const v = await Version.find({
+        var v = await Version.findOne({
             ontology: version['version']['ontology'],
             taxonomy: version['version']['taxonomy'],
             content: version['version']['content']
         })
         
         // if the version does not yet exist in the database, add it 
-        if(v.length == 0) {
+        if(v == null) {
             console.log('Version v' + version['version']['ontology'] + '.' + version['version']['taxonomy'] + '.' + version['version']['content'] + ' does not yet exist in the database.')
 
             // check all references 
             allreferences = Object.keys(version['extraction']['current'])
             allextractions = allreferences.map(k => version['extraction']['current'][k])
 
+            var reflist = []
             for(const rk of allreferences) {
                 var reference = null;
                 const ref = await Reference.find({refkey: rk})
@@ -113,79 +115,103 @@ updateVersions = async function(versions, extractions) {
                 if(ref.length == 0) {
                     console.log('Reference ' + rk + ' does not yet exist in the database.');
 
-                    refinfo = getExtractionWhichSpecifiesReference(extractions, rk);
+                    var refinfo = getExtractionWhichSpecifiesReference(extractions, rk);
                     reference = new Reference({
-                        refkey: refinfo['indicator'],
-                        citation: refinfo['citation']
+                        refkey: refinfo['ID'],
+                        citation: refinfo['Refstring']
                     });
                     await reference.save()
                 } else {
                     reference = ref[0]
                 }
+
+                reflist.push(reference._id)
             }
 
+            extractionmap = []
             for(const ek of allextractions) {
-                var extraction = null;
-                const ext = await Extraction.find({extid: ek})
+                
+                const refkey = Object.keys(extractions[ek]['reference']).indexOf('ID') > -1 ? extractions[ek]['reference']['ID'] : extractions[ek]['reference']
+                const reference = await Reference.findOne({refkey: refkey})
 
-                if(ext.length == 0) {
-                    e = await readJson('extractions/' + ek + '.json')
-                    parseExtraction(ek, extractions[ek])
-                } else {
-                    extraction = ext[0]
+                var extraction = await Extraction.findOne({extid: ek})
+                if(extraction == null) {
+                    extraction = parseExtraction(ek, extractions[ek], reference)
                 }
+
+                exmap = await RefMap.findOne({
+                    reference: reference._id,
+                    extraction: extraction._id
+                });
+                if(exmap == null) {
+                    exmap = new RefMap({
+                        reference: reference._id,
+                        extraction: extraction._id
+                    });
+                    await exmap.save();
+                }
+                extractionmap.push(exmap._id);
             }
+
+            v = Version({
+                ontology: version['version']['ontology'],
+                taxonomy: version['version']['taxonomy'],
+                content: version['version']['content'],
+                timestamp: version['timestamp'],
+                references: reflist,
+                map: extractionmap
+            });
+            await v.save();
         }
     }
 }
 
 getExtractionWhichSpecifiesReference = function(extractions, refkey) {
     for(const extraction of Object.values(extractions)) {
-        if(Object.keys(extraction['reference']).indexOf('indicator') > -1) {
-            return extraction['reference']
+        if(Object.keys(extraction['reference']).indexOf('ID') > -1) {
+            if(extraction['reference']['ID'] == refkey) {
+                return extraction['reference']
+            }
         }
     }
     return null
 }
 
-parseExtraction = async function(extid, extraction) {
-    const contributor = await Contributor.find({acronym: extraction['extractor']})
-
-    const refkey = Object.keys(extraction['reference']).indexOf('indicator') > -1 ? extraction['reference']['indicator'] : extraction['reference']
-    const reference = await Reference.findOne({refkey: refkey})
+parseExtraction = async function(extid, extraction, reference) {
+    const contributor = await Contributor.findOne({acronym: extraction['extractor']})
 
     // check all descriptions
     descriptionKeys = []
     factorKeys = []
     if(Object.keys(extraction).indexOf('descriptions') > -1) {
         for(const desc of extraction['descriptions']) {
-            var description = await Description.findOne({id: desc['ID']});
+            var description = await Description.findOne({id: desc['id']});
 
             if(description == null) {
-                console.log('Description [' + desc['ID'] + '] is not included in the database yet.')
+                console.log('Description [' + desc['id'] + '] is not included in the database yet.')
                 description = new Description({
-                    id: desc['ID'],
+                    id: desc['id'],
                     reference: reference._id,
-                    definition: desc['Definition'],
-                    impact: desc['Impact'],
-                    empiricalevidence: desc['Empirical Evidence'],
-                    pracitionersinvolved: desc['Practitioners Involved']
+                    definition: desc['definition'],
+                    impact: desc['impact'],
+                    empiricalevidence: desc['empirical evidence'],
+                    pracitionersinvolved: desc['practitioners involved']
                 });
                 await description.save();
 
                 // check if the quality attribute of the description is already contained in the database
-                var factor = await Factor.findOne({id: desc['QA-ID']});
+                var factor = await Factor.findOne({id: desc['qf id']});
                 if(factor == null) {
                     // obtain the quality factor that is explained by the description (match the ID of the factor to the QA-ID of the description)
-                    const qf = extraction['quality attributes'].filter(f => f['ID']==desc['QA-ID'])[0]
-                    console.log('Quality Factor ' + qf['Name'] + ' [' + qf['ID'] + '] is not included in the database yet.')
+                    const qf = extraction['quality factors'].filter(f => f['id']==desc['qf id'])[0]
+                    console.log('Quality Factor ' + qf['name'] + ' [' + qf['id'] + '] is not included in the database yet.')
 
                     factor = new Factor({
-                        id: qf['ID'],
-                        name: qf['Name'],
+                        id: qf['id'],
+                        name: qf['name'],
                         reference: [reference._id],
-                        linguisticcomplexity: qf['Linguistic Complexity'],
-                        scope: qf['Scope']
+                        linguisticcomplexity: qf['linguistic complexity'].toLowerCase(),
+                        scope: qf['scope']
                     });
                     await factor.save();
                 }
@@ -203,23 +229,28 @@ parseExtraction = async function(extid, extraction) {
     var datasetKeys = []
     if(Object.keys(extraction).indexOf('data sets') > -1) {
         for(const ds of extraction['data sets']) {
-            var dataset = await Dataset.findOne({id: ds['ID']});
+            var dataset = await Dataset.findOne({id: ds['id']});
 
             if(dataset == null) {
-                console.log('Dataset [' + ds['ID'] + '] is not included in the database yet.')
-                embedded = await getIDsOfEmbedded(ds['Embedded Information'])
+                console.log('Dataset [' + ds['id'] + '] is not included in the database yet.')
+                embedded = await getIDsOfEmbedded(ds['embedded information'])
+
+                granularity = ds['granularity']
+                if(granularity.slice(-1) == 's') {
+                    granularity = granularity.slice(0, -1)
+                }
                 
                 dataset = new Dataset({
-                    id: ds['ID'],
+                    id: ds['id'],
                     reference: reference._id,
                     embedded: embedded,
-                    description: ds['Description'],
-                    origin: ds['Origin'],
-                    groundtruthannotators: ds['Ground Truth Annotator'],
-                    size: ds['Size'],
-                    granularity: ds['Granularity'],
-                    accessibility: ds['Accessibility'],
-                    sourcelink: ds['Source Link']
+                    description: ds['description'],
+                    origin: ds['origin'],
+                    groundtruthannotators: ds['ground truth annotators'],
+                    size: ds['size'],
+                    granularity: granularity,
+                    accessibility: ds['accessibility'],
+                    sourcelink: ds['source link']
                 });
                 await dataset.save();
             }
@@ -230,28 +261,31 @@ parseExtraction = async function(extid, extraction) {
     var approachKeys = []
     if(Object.keys(extraction).indexOf('approaches') > -1) {
         for(const ap of extraction['approaches']) {
-            var approach = await Approach.findOne({id: ap['ID']});
+            var approach = await Approach.findOne({id: ap['id']});
 
             if(approach == null) {
-                console.log('Approach [' + ap['ID'] + '] is not included in the database yet.')
-                const embedded = await getIDsOfEmbedded(ap['Detecting'])
+                console.log('Approach [' + ap['id'] + '] is not included in the database yet.')
+                const embedded = await getIDsOfEmbedded(ap['descriptions'])
                 
                 var structure = {
-                    id: ap['ID'],
+                    id: ap['id'],
                     reference: reference._id,
                     detecting: embedded, 
-                    description: ap['Name'],
-                    acronym: ap['Short'],
-                    type: ap['Type'],
-                    accessibility: ap['Accessibility'],
-                    empiricalmethod: ap['Empirical method applied'],
-                    pracitionersinvolved: ap['Practitioners involved'],
-                    sourcelink: ds['Source Link'],
-                    necessaryinformation: ds['Necessary Information']
+                    description: ap['name'],
+                    acronym: ap['acronym'],
+                    type: ap['type'],
+                    accessibility: ap['accessibility'],
+                    empiricalmethod: ap['empirical method applied'],
+                    pracitionersinvolved: ap['practitioners involved'],
+                    sourcelink: ap['source link'],
+                    necessaryinformation: ap['necessary information']
                 }
-                for(const release of ap['Release']) {
-                    const code = release.toLowerCase().replace(' ', '');
-                    structure[code] = true;
+
+                if(Object.keys(ap).indexOf('release') > -1) {
+                    for(const release of ap['release']) {
+                        const code = release.toLowerCase().replace(' ', '');
+                        structure[code] = true;
+                    }
                 }
                 
                 approach = new Approach(structure);
@@ -263,14 +297,14 @@ parseExtraction = async function(extid, extraction) {
 
     var extraction = new Extraction({
         extid: extid,
-        extractor: contributor[0]._id,
+        extractor: contributor._id,
         factors: factorKeys,
         descriptions: descriptionKeys,
         datasets: datasetKeys
     });
-    //console.log(extraction);
-    // await extraction.save()
-    return extraction._id;
+    
+    await extraction.save()
+    return extraction;
 }
 
 getIDsOfEmbedded = async function(descIDs) {

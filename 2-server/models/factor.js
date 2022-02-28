@@ -21,12 +21,12 @@ const schema = new mongoose.Schema({
     }],
     linguisticcomplexity: {
         type: String,
-        enum: ['lexical', 'syntactic', 'semantic', 'pragmatic'],
+        enum: ['lexical', 'syntactic', 'semantic', 'structural', 'pragmatic'],
         required: true
     },
     scope: {
         type: String,
-        enum: ["Word", "Phrase", "Sentence", "Structured/tabular text", "User Story", "Use Case", "Requirement", "Section", "Document", "Global"],
+        enum: ["Word", "Phrase", "Sentence", "Structured/tabular text", "User Story", "Use Case", "Requirement", "Section", "Document", "Global", "Structured/tabular text (Use Case)"],
         required: true
     },
     ambiguity: {
