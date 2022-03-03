@@ -1,0 +1,13 @@
+extends ../layout
+
+block content
+    table 
+        thead 
+            tr 
+                td.tcol_short Key 
+                td.tcol_span Citation 
+        tbody
+            for ref in references 
+                tr
+                    td= ref.refkey 
+                    td= ref.citation

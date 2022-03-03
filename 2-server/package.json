@@ -11,10 +11,12 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.26.0",
+    "cors": "^2.8.5",
     "express": "^4.17.2",
     "git-clone": "^0.2.0",
     "git-clone-or-pull": "^4.0.0",
     "mongoose": "^6.2.1",
-    "node-fetch": "^2.6.7"
+    "node-fetch": "^2.6.7",
+    "pug": "^3.0.2"
   }
 }

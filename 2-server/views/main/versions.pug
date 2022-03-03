@@ -1,0 +1,16 @@
+extends ../layout
+
+block content
+    table 
+        thead 
+            tr 
+                td.tcol_short Version 
+                td.tcol_span References 
+                td.tcol_short Link
+        tbody
+            for v in versions 
+                tr
+                    td= `v${v.ontology}.${v.taxonomy}.${v.content}`
+                    td= v.references
+                    td 
+                        a(href=`/references/${v.id}`) See

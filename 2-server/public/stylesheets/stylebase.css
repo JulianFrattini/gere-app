@@ -1,0 +1,65 @@
+/* GENERAL STYLING */
+html {
+    background: #f7f7f7;
+}
+
+
+body {
+    font-size: 14px;
+    font-family: 'Barlow', sans-serif;
+    color: rgb(49, 46, 46);
+    background: white;
+    margin: 0 auto;
+    padding: 50px 20px;
+    text-align: center;
+}
+
+/* CONTAINERS */
+header {
+    padding-bottom: 10px;
+}
+
+header>*>h1 {
+    padding: 0 40px 0 0;
+}
+
+.headline {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+}
+
+.headline>h1 {
+    flex-grow: 1;
+}
+
+nav {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+nav li {
+    display: inline;
+    padding-right: 10px;
+}
+
+/* MEDIA QUERIES */
+@media (max-width: 800px) {
+    .smallscreen {
+        display: inherit;
+    }
+
+    .largescreen {
+        display: none;
+    }
+}
+
+@media (min-width: 801px) {
+    .smallscreen {
+        display: none;
+    }
+
+    .largescreen {
+        display: inherit;
+    }
+}
