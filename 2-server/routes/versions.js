@@ -3,6 +3,7 @@ const router = express.Router()
 
 const versionController = require('../controller/versionController')
 
-router.get('/test', versionController.getVersion);
+router.get('/all', versionController.getAllVersions);
+router.get('/version/:vid', versionController.getVersion);
 
 module.exports = router

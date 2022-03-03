@@ -7,10 +7,13 @@ const mongoose = require('mongoose')
 const indexRouter = require('./routes/index')
 const extractionRouter = require('./routes/extractions')
 const versionsRouter = require('./routes/versions')
+const subjectRouter = require('./routes/subject')
 
 app.use('/api/index/', indexRouter)
 app.use('/api/extraction/', extractionRouter)
-app.use('/api/version/', versionsRouter)
+app.use('/api/versions/', versionsRouter)
+app.use('/api/subjects/', subjectRouter)
+
 
 // setup connection to mongoDB
 mongoose.connect('mongodb://localhost:27017/rqft', { useNewUrlParser: true, useUnifiedTopology: true });
