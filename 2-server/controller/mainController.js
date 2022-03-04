@@ -1,10 +1,13 @@
+const fs = require('fs')
+
 const Version = require('../models/version')
 const References = require('../models/reference')
 const Factor = require('../models/factor')
 const Dataset = require('../models/dataset')
 const Approach = require('../models/approach')
 
-const linguisticcomplexity = ['lexical', 'syntactic', 'semantic', 'structural']
+let rawdata = fs.readFileSync('./../0-data/structure/ontology-1/taxonomy-0/quality-factor.json')
+let structure = JSON.parse(rawdata)
 
 
 exports.getLandingPage = async(req, res, next) => {
@@ -55,7 +58,8 @@ exports.getFactorsOfReference = async(req, res, next) => {
 
         res.render('main/factors', {
             factors: factors, 
-            linguisticcomplexity: linguisticcomplexity
+            linguisticcomplexity: structure['attributes'].find(a => a['name'] == 'linguistic complexity')['characteristics'].map(c => c['value']),
+            scope: structure['attributes'].find(a => a['name'] == 'Scope')['characteristics'].map(c => c['value'])
         });
     } catch(error) {
         next(error)

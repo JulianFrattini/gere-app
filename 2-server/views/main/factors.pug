@@ -14,13 +14,21 @@ block content
                 td.tcol_span Description 
                 td.tcol_span Impact
                 td.tcol_middle
-                    #list1.dropdown-check-list(tabindex="100")
-                        span.anchor Complexity 
-                        ul.items 
+                    .dimension.dropdown-check-list(tabindex="100")
+                        span.label Complexity 
+                        ul.characteristics 
                             for lc in linguisticcomplexity
                                 li 
-                                    input(type='checkbox' checked=true onclick=`checkedComplexity('linguisticcomplexity', '${lc}', this.checked);`)
+                                    input(type='checkbox' checked=true onclick=`filterDimension('linguisticcomplexity', '${lc}', this.checked);`)
                                     = lc
+                td.tcol_middle
+                    .dimension.dropdown-check-list(tabindex="100")
+                        span.label Scope 
+                        ul.characteristics 
+                            for sc in scope
+                                li 
+                                    input(type='checkbox' checked=true onclick=`filterDimension('scope', '${sc}', this.checked);`)
+                                    = sc
                                 
         tbody
             for factor in factors 
@@ -30,3 +38,4 @@ block content
                     td= factor.descriptions[0].definition
                     td= factor.descriptions[0].impact
                     td= factor.linguisticcomplexity
+                    td= factor.scope

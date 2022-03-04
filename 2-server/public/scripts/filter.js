@@ -2,25 +2,21 @@ const subjects = JSON.parse(document.currentScript.getAttribute('subjects'));
 
 window.onload = function() {
 
-    var checkList = document.getElementById('list1');
-    checkList.getElementsByClassName('anchor')[0].onclick = function (evt) {
-        if (checkList.classList.contains('visible'))
-            checkList.classList.remove('visible');
-        else
-            checkList.classList.add('visible');
-    }
 
+    for(const dimension of document.getElementsByClassName('dimension')) {
+        dimension.getElementsByClassName('label')[0].onclick = function (evt) {
+            if (dimension.classList.contains('visible'))
+                dimension.classList.remove('visible');
+            else
+                dimension.classList.add('visible');
+        }
+    }
 }
 
-function checkedComplexity(dimension, characteristic, cb) {
-    console.log(dimension + ' ' + characteristic + ' ' + cb)
+function filterDimension(dimension, characteristic, visible) {
     for(const subject of subjects) {
-        if(subject[dimension] == characteristic) {
-            if(cb) {
-                var row = document.getElementById(subject['id']).style.display = ''
-            } else {
-                document.getElementById(subject['id']).style.display = 'none'
-            }
+        if(subject[dimension].toLowerCase() == characteristic) {
+            document.getElementById(subject['id']).style.display = visible ? '' : 'none'
         }
     }
 }

@@ -2,7 +2,7 @@
     display: inline-block;
 }
 
-.dropdown-check-list .anchor {
+.dropdown-check-list .label {
     position: relative;
     cursor: pointer;
     display: inline-block;
@@ -10,7 +10,7 @@
     border: 1px solid #ccc;
 }
 
-.dropdown-check-list .anchor:after {
+.dropdown-check-list .label:after {
     position: absolute;
     content: "";
     border-left: 2px solid black;
@@ -25,12 +25,12 @@
     transform: rotate(-135deg);
 }
 
-.dropdown-check-list .anchor:active:after {
+.dropdown-check-list .label:active:after {
     right: 8px;
     top: 21%;
 }
 
-.dropdown-check-list ul.items {
+.dropdown-check-list ul.characteristics {
     padding: 2px;
     display: none;
     margin: 0;
@@ -38,14 +38,14 @@
     border-top: none;
 }
 
-.dropdown-check-list ul.items li {
+.dropdown-check-list ul.characteristics li {
     list-style: none;
 }
 
-.dropdown-check-list.visible .anchor {
+.dropdown-check-list.visible .label {
     color: #0094ff;
 }
 
-.dropdown-check-list.visible .items {
+.dropdown-check-list.visible .characteristics {
     display: block;
 }
