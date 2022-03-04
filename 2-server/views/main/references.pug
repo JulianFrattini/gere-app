@@ -6,8 +6,11 @@ block content
             tr 
                 td.tcol_short Key 
                 td.tcol_span Citation 
+                td.tcol_short See
         tbody
             for ref in references 
                 tr
                     td= ref.refkey 
                     td= ref.citation
+                    td 
+                        a(href=`/factors/${ref._id}`) see

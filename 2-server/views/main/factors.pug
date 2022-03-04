@@ -1,0 +1,18 @@
+extends ../layout
+
+block content
+    h2 Factors
+    table 
+        thead 
+            tr 
+                td.tcol_short Index 
+                td.tcol_short Name
+                td.tcol_span Description 
+                td.tcol_span Impact
+        tbody
+            for factor in factors 
+                tr
+                    td= factor.id
+                    td= factor.name 
+                    td= factor.descriptions[0].definition
+                    td= factor.descriptions[0].impact
