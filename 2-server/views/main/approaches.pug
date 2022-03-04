@@ -1,0 +1,18 @@
+extends ../layout
+
+block content
+    h2 Approaches
+    table 
+        thead 
+            tr 
+                td.tcol_short Index 
+                td.tcol_icon Acro
+                td.tcol_span Description 
+                td.tcol_short Type
+        tbody
+            for ap in approaches 
+                tr
+                    td= ap.id
+                    td= ap.acronym
+                    td= ap.description 
+                    td= ap.type

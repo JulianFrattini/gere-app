@@ -1,6 +1,11 @@
 const Version = require('../models/version')
 const References = require('../models/reference')
 const Factor = require('../models/factor')
+const Dataset = require('../models/dataset')
+const Approach = require('../models/approach')
+
+const linguisticcomplexity = ['lexical', 'syntactic', 'semantic', 'structural']
+
 
 exports.getLandingPage = async(req, res, next) => {
     res.render('index');
@@ -49,7 +54,32 @@ exports.getFactorsOfReference = async(req, res, next) => {
             .populate({path: 'descriptions', model: 'Description'});
 
         res.render('main/factors', {
-            factors: factors
+            factors: factors, 
+            linguisticcomplexity: linguisticcomplexity
+        });
+    } catch(error) {
+        next(error)
+    }
+}
+
+exports.getDatasetsOfReference = async(req, res, next) => {
+    try {
+        const dataset = await Dataset.find({reference: req.params.rid});
+
+        res.render('main/datasets', {
+            datasets: dataset
+        });
+    } catch(error) {
+        next(error)
+    }
+}
+
+exports.getApproachesOfReference = async(req, res, next) => {
+    try {
+        const approaches = await Approach.find({reference: req.params.rid});
+
+        res.render('main/approaches', {
+            approaches: approaches
         });
     } catch(error) {
         next(error)

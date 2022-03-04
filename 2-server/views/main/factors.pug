@@ -1,18 +1,32 @@
 extends ../layout
 
+block append head
+    link(rel='stylesheet' href='/stylesheets/filterbox.css')
+    script(src='/scripts/filter.js' subjects=`${JSON.stringify(factors)}`)
+
 block content
     h2 Factors
     table 
         thead 
             tr 
                 td.tcol_short Index 
-                td.tcol_short Name
+                td.tcol_middle Name
                 td.tcol_span Description 
                 td.tcol_span Impact
+                td.tcol_middle
+                    #list1.dropdown-check-list(tabindex="100")
+                        span.anchor Complexity 
+                        ul.items 
+                            for lc in linguisticcomplexity
+                                li 
+                                    input(type='checkbox' checked=true onclick=`checkedComplexity('linguisticcomplexity', '${lc}', this.checked);`)
+                                    = lc
+                                
         tbody
             for factor in factors 
-                tr
+                tr(id= factor.id)
                     td= factor.id
                     td= factor.name 
                     td= factor.descriptions[0].definition
                     td= factor.descriptions[0].impact
+                    td= factor.linguisticcomplexity

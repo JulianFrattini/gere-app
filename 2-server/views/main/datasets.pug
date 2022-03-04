@@ -1,0 +1,16 @@
+extends ../layout
+
+block content
+    h2 Data Sets
+    table 
+        thead 
+            tr 
+                td.tcol_short Index 
+                td.tcol_span Description 
+                td.tcol_short Content
+        tbody
+            for ds in datasets 
+                tr
+                    td= ds.id
+                    td= ds.description 
+                    td= `${ds.size} ${ds.granularity}s`
