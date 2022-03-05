@@ -31,6 +31,10 @@ th, td {
     width: 100px;
 }
 
+.tcol_wide {
+    width: 250px;
+}
+
 .tcol_highlight {
     background-color: rgba(0, 225, 255, 0.1)
 }

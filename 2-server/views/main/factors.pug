@@ -12,7 +12,12 @@ block content
         thead 
             tr 
                 td.tcol_short Index 
-                td.tcol_middle Name
+                td.tcol_wide
+                    .dimension.dropdown-check-list
+                        span.label Name
+                        ul.characteristics
+                            li 
+                                input(type='text' oninput=`filterScopenote('name', this.value)`)
                 //- td.tcol_span Description 
                 //- td.tcol_span Impact
                 td.tcol_middle

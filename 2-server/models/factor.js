@@ -29,7 +29,19 @@ const schema = new mongoose.Schema({
         enum: ["Word", "Phrase", "Sentence", "Structured/tabular text", "User Story", "Use Case", "Requirement", "Section", "Document", "Global", "Structured/tabular text (Use Case)"],
         required: true
     },
+    adequacy: {
+        type: String,
+        enum: ['+', '', '-', '?'],
+        default: '?',
+        required: true
+    },
     ambiguity: {
+        type: String,
+        enum: ['+', '', '-', '?'],
+        default: '?',
+        required: true
+    },
+    atomicity: {
         type: String,
         enum: ['+', '', '-', '?'],
         default: '?',
@@ -47,6 +59,12 @@ const schema = new mongoose.Schema({
         default: '?',
         required: true
     },
+    compliance: {
+        type: String,
+        enum: ['+', '', '-', '?'],
+        default: '?',
+        required: true
+    },
     consistency: {
         type: String,
         enum: ['+', '', '-', '?'],
@@ -54,6 +72,36 @@ const schema = new mongoose.Schema({
         required: true
     },
     correctness: {
+        type: String,
+        enum: ['+', '', '-', '?'],
+        default: '?',
+        required: true
+    },
+    designindependent: {
+        type: String,
+        enum: ['+', '', '-', '?'],
+        default: '?',
+        required: true
+    },
+    feasibility: {
+        type: String,
+        enum: ['+', '', '-', '?'],
+        default: '?',
+        required: true
+    },
+    maintainability: {
+        type: String,
+        enum: ['+', '', '-', '?'],
+        default: '?',
+        required: true
+    },
+    modifiability: {
+        type: String,
+        enum: ['+', '', '-', '?'],
+        default: '?',
+        required: true
+    },
+    precision: {
         type: String,
         enum: ['+', '', '-', '?'],
         default: '?',
