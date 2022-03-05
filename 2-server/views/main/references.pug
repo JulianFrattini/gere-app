@@ -1,17 +1,26 @@
 extends ../layout
 
+block append head
+    link(rel='stylesheet' href='/stylesheets/filterbox.css')
+    script(src='/scripts/filter.js' subjects=`${JSON.stringify(references)}` id='refkey')
+
 block content
     table 
         thead 
             tr 
                 td.tcol_short Key 
-                td.tcol_span Citation 
+                td.tcol_span 
+                    .dimension.dropdown-check-list
+                        span.label Citation
+                        ul.characteristics
+                            li 
+                                input(type='text' oninput=`filterScopenote('citation', this.value)` placeholder='Type to filter')
                 td.tcol_short QFs
                 td.tcol_short DSs
                 td.tcol_short APs
         tbody
             for ref in references 
-                tr
+                tr(id= ref.refkey)
                     td= ref.refkey 
                     td= ref.citation
                     td 

@@ -1,11 +1,23 @@
+// parse the subjects which are displayed in the rows of the table
 const subjects = JSON.parse(document.currentScript.getAttribute('subjects'));
-const triplevalues = JSON.parse(document.currentScript.getAttribute('triplevalues'));
-const statuscarusel = [
-    { class: 'ficon_positive', color: 'rgb(146, 208, 80)', tooltipaddendum: ' is positive' }, 
-    { class: 'ficon_negative', color: 'rgb(192, 0, 0)', tooltipaddendum: ' is negative' }, 
-    { class: 'ficon_unknown', color: 'grey', tooltipaddendum: ' is unknown' },
-    { class: 'ficon_default', color: 'rgb(49, 46, 46)', tooltipaddendum: '' }
-]
+
+// in case there is a dimension with a limited number of characteristics (like a triple), build a status carousel to cycle through
+var statuscarousel = null
+if(document.currentScript.getAttributeNames().includes('triplevalues')) {
+    const triplevalues = JSON.parse(document.currentScript.getAttribute('triplevalues'));
+    statuscarousel = [
+        { class: 'ficon_positive', color: 'rgb(146, 208, 80)', tooltipaddendum: ' is positive', value: triplevalues[1]}, 
+        { class: 'ficon_negative', color: 'rgb(192, 0, 0)', tooltipaddendum: ' is negative', value: triplevalues[0]}, 
+        { class: 'ficon_unknown', color: 'grey', tooltipaddendum: ' is unknown', value: triplevalues[2] },
+        { class: 'ficon_default', color: 'rgb(49, 46, 46)', tooltipaddendum: '' }
+    ]
+}
+
+// override the id property if necessary
+var id = 'id'
+if(document.currentScript.getAttributeNames().includes("id")) {
+    id = document.currentScript.getAttribute('id');
+}
 
 window.onload = function() {
     for(const dimension of document.getElementsByClassName('dimension')) {
@@ -27,36 +39,32 @@ window.onload = function() {
                 filter.classList.add('visible');
         }
     }
-    
-    statuscarusel[0]['value'] = triplevalues[1];
-    statuscarusel[1]['value'] = triplevalues[0];
-    statuscarusel[2]['value'] = triplevalues[2];
 }
 
 function filterDimension(dimension, characteristic, visible) {
     for(const subject of subjects) {
         if(subject[dimension].toLowerCase() == characteristic.toLowerCase()) {
-            document.getElementById(subject['id']).style.display = visible ? '' : 'none'
+            document.getElementById(subject[id]).style.display = visible ? '' : 'none'
         }
     }
 }
 
 function filterTriple(dimension, icon) {
-    for(const status of statuscarusel) {
+    for(const status of statuscarousel) {
         if(icon.classList.contains(status.class)) {
-            const index = statuscarusel.indexOf(status)
-            const nextindex = (index+1)%(statuscarusel.length)
+            const index = statuscarousel.indexOf(status)
+            const nextindex = (index+1)%(statuscarousel.length)
             
-            icon.classList.remove(statuscarusel[index].class);
-            icon.classList.add(statuscarusel[nextindex].class);
-            icon.style.color = statuscarusel[nextindex].color
-            icon.title = `${dimension}` + statuscarusel[nextindex].tooltipaddendum + ' (click to filter)'
+            icon.classList.remove(statuscarousel[index].class);
+            icon.classList.add(statuscarousel[nextindex].class);
+            icon.style.color = statuscarousel[nextindex].color
+            icon.title = `${dimension}` + statuscarousel[nextindex].tooltipaddendum + ' (click to filter)'
 
             for(const subject of subjects) {
-                if('value' in statuscarusel[nextindex]) {
-                    document.getElementById(subject['id']).style.display = subject[dimension] == statuscarusel[nextindex].value ? '' : 'none'
+                if('value' in statuscarousel[nextindex]) {
+                    document.getElementById(subject[id]).style.display = subject[dimension] == statuscarousel[nextindex].value ? '' : 'none'
                 } else {
-                    document.getElementById(subject['id']).style.display = ''
+                    document.getElementById(subject[id]).style.display = ''
                 }
             }
             break
@@ -66,10 +74,7 @@ function filterTriple(dimension, icon) {
 
 function filterScopenote(attribute, text) {
     for(const subject of subjects) {
-        const entry = document.getElementById(subject['id']);
-
-        //console.log(subject[attribute].toLowerCase())
-
+        const entry = document.getElementById(subject[id]);
         if(text == "") {
             entry.style.display = ''
         } else {
