@@ -2,17 +2,19 @@ extends ../layout
 
 block append head
     link(rel='stylesheet' href='/stylesheets/filterbox.css')
-    script(src='/scripts/filter.js' subjects=`${JSON.stringify(factors)}`)
+    script(src='/scripts/filter.js' subjects=`${JSON.stringify(factors)}` triplevalues=`${JSON.stringify(aspects_char)}`)
 
 block content
     h2 Factors
+    p= reference.citation
+
     table 
         thead 
             tr 
                 td.tcol_short Index 
                 td.tcol_middle Name
-                td.tcol_span Description 
-                td.tcol_span Impact
+                //- td.tcol_span Description 
+                //- td.tcol_span Impact
                 td.tcol_middle
                     .dimension.dropdown-check-list(tabindex="100")
                         span.label Complexity 
@@ -29,13 +31,66 @@ block content
                                 li 
                                     input(type='checkbox' checked=true onclick=`filterDimension('scope', '${sc}', this.checked);`)
                                     = sc
+                for aspect in aspects 
+                    td.tcol_icon.ficon_default(title=`${aspect} (click to filter)` onclick=`filterTriple('${aspect}', this)`) 
+                        span
+                            if aspect == 'adequacy'
+                                i.fa-brands.fa-black-tie.ficon_default
+                            else if aspect == 'ambiguity'
+                                i.fa-solid.fa-hands-asl-interpreting.ficon_default
+                            else if aspect == 'atomicity'
+                                i.fa-solid.fa-atom.ficon_default
+                            else if aspect == 'completeness'
+                                i.fa-solid.fa-circle.ficon_default
+                            else if aspect == 'complexity'
+                                i.fa-solid.fa-bezier-curve.ficon_default
+                            else if aspect == 'compliance'
+                                i.fa-solid.fa-section.ficon_default
+                            else if aspect == 'correctness'
+                                i.fa-solid.fa-circle-check.ficon_default
+                            else if aspect == 'consistency'
+                                i.fa-solid.fa-code-compare.ficon_default
+                            else if aspect == 'design-independence'
+                                i.fa-solid.fa-palette.ficon_default
+                            else if aspect == 'feasibility'
+                                i.fa-solid.fa-code-pull-request.ficon_default
+                            else if aspect == 'maintainability'
+                                i.fa-solid.fa-folder-open.ficon_default
+                            else if aspect == 'modifiability'
+                                i.fa-solid.fa-code-fork.ficon_default
+                            else if aspect == 'precision'
+                                i.fa-solid.fa-crosshairs.ficon_default
+                            else if aspect == 'redundancy'
+                                i.fa-solid.fa-copy.ficon_default
+                            else if aspect == 'relevancy'
+                                i.fa-solid.fa-newspaper.ficon_default
+                            else if aspect == 'reusability'
+                                i.fa-solid.fa-recycle.ficon_default
+                            else if aspect == 'traceability'
+                                i.fa-solid.fa-paw.ficon_default
+                            else if aspect == 'understandability'
+                                i.fa-solid.fa-book-open.ficon_default
+                            else if aspect == 'verifiability'
+                                i.fa-solid.fa-clipboard-list.ficon_default
+                            else 
+                                i.fa-solid.fa-circle-dot.ficon_default
+                        //- #{aspect.substr(0, 1)} 
                                 
         tbody
             for factor in factors 
                 tr(id= factor.id)
                     td= factor.id
                     td= factor.name 
-                    td= factor.descriptions[0].definition
-                    td= factor.descriptions[0].impact
+                    //- td= factor.descriptions[0].definition
+                    //- td= factor.descriptions[0].impact
                     td= factor.linguisticcomplexity
                     td= factor.scope
+                    for aspect in aspects 
+                        if factor[aspect] == '?'
+                            td.tc_unknown(title='unknown impact') 
+                        else if factor[aspect] == '-'
+                            td.tc_bad(title='negative impact') -
+                        else if factor[aspect] == '+'
+                            td.tc_good(title='positive impact') +
+                        else
+                            td.tc_obsole

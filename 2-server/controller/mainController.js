@@ -53,13 +53,17 @@ exports.getAllReferences = async(req, res, next) => {
 
 exports.getFactorsOfReference = async(req, res, next) => {
     try {
+        const reference = await References.findById(req.params.rid);
         const factors = await Factor.find({reference: req.params.rid})
             .populate({path: 'descriptions', model: 'Description'});
 
         res.render('main/factors', {
+            reference: reference,
             factors: factors, 
             linguisticcomplexity: structure['attributes'].find(a => a['name'] == 'linguistic complexity')['characteristics'].map(c => c['value']),
-            scope: structure['attributes'].find(a => a['name'] == 'Scope')['characteristics'].map(c => c['value'])
+            scope: structure['attributes'].find(a => a['name'] == 'Scope')['characteristics'].map(c => c['value']),
+            aspects: structure['attributes'].find(a => a['name'] == 'aspect')['dimensions'].map(d => d['dimension']),
+            aspects_char: structure['attributes'].find(a => a['name'] == 'aspect')['characteristics'].map(c => c['value'])
         });
     } catch(error) {
         next(error)

@@ -1,0 +1,11 @@
+.ficon_default {
+    color: grey
+}
+
+.ficon_positive {
+    color: rgb(146, 208, 80);
+}
+
+.ficon_negative {
+    color: rgb(192, 0, 0);
+}

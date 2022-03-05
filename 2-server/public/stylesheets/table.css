@@ -38,3 +38,28 @@ th, td {
 tbody>tr:hover {
     background: #f5f5f5;
 }
+
+.tc_good {
+    background-color: rgb(146, 208, 80);
+    text-align: center;
+}
+
+.tc_okay {
+    background-color: rgb(255, 192, 0);
+    text-align: center;
+}
+
+.tc_bad {
+    background-color: rgb(192, 0, 0);
+    text-align: center;
+}
+
+.tc_unknown {
+    background-color: #dddddd;
+    text-align: center;
+}
+
+.tc_obsolete {
+    background-color: #3a3a3a;
+    text-align: center;
+}
