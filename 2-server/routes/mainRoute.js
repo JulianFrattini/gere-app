@@ -8,13 +8,20 @@ router.get('/', mainController.getLandingPage);
 router.get('/versions', mainController.getAllVersions);
 router.get('/references', mainController.getReferences);
 
+// factors
 router.get('/factors/:rid', function(req, res, next) {
     req.session.rid = req.params.rid;
     res.redirect('/factors')
 });
 router.get('/factors', mainController.getFactors);
 
-router.get('/dataset/:rid', mainController.getDatasetsOfReference);
+// data sets
+router.get('/datasets/:rid', function(req, res, next) {
+    req.session.rid = req.params.rid;
+    res.redirect('/datasets')
+});
+router.get('/datasets', mainController.getDatasets);
+
 router.get('/approaches/:rid', mainController.getApproachesOfReference);
 
 

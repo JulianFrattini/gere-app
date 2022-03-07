@@ -1,7 +1,6 @@
 // parse the subjects which are displayed in the rows of the table
 const subjects = JSON.parse(document.currentScript.getAttribute('subjects'));
 
-
 var cycles = {};
 if(document.currentScript.getAttributeNames().includes('cycles')) {
     const cs = JSON.parse(document.currentScript.getAttribute('cycles'));
@@ -61,7 +60,6 @@ window.onload = function() {
 }
 
 function filter() {
-    console.log(filters);
     for(const subject of subjects) {
         if(filters.length == 0) {
             // if no filter is active, display all elements
@@ -92,22 +90,33 @@ function filter() {
                         break;
                     }
                 } else if(f.type == 'refersto') {
-                    var keyFound = false;
-                    for(const reference of subject[f.attribute]) {
-                        if(reference[f.key].includes(f.text)) {
-                            keyFound = true;
+                    // check if it is only a straight reference or a list of references
+                    if(Array.isArray(subject[f.attribute])) {
+                        var keyFound = false;
+                        for(const reference of subject[f.attribute]) {
+                            if(reference[f.key].includes(f.text)) {
+                                keyFound = true;
+                                break;
+                            }
+                        }
+    
+                        if(!keyFound) {
+                            violatesFilter = true;
                             break;
                         }
-                    }
-
-                    if(!keyFound) {
-                        violatesFilter = true;
-                        break;
+                    } else {
+                        if(!subject[f.attribute][f.key].includes(f.text)) {
+                            violatesFilter = true;
+                            break;
+                        }
                     }
                 }
             }
 
             document.getElementById(subject[id]).style.display = violatesFilter ? 'none' : ''
+            if(violatesFilter) {
+                closeExpander(subject[id]+'D')
+            }
         }
     }
 }

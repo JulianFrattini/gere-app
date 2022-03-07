@@ -1,16 +1,76 @@
 extends ../layout
 
+block append head
+    link(rel='stylesheet' href='/stylesheets/filterbox.css')
+    script(src='/scripts/toggleExpander.js')
+    script(src='/scripts/filter.js' subjects=`${JSON.stringify(datasets)}`)
+
 block content
     h2 Data Sets
     table 
         thead 
             tr 
                 td.tcol_short Index 
-                td.tcol_span Description 
+                td.tcol_middle
+                    .dimension.dropdown-check-list(tabindex="100")
+                        span.label Embedded 
+                        ul.characteristics
+                            li 
+                                input.reflistfilter(type='text' oninput=`filterReflist('embedded', 'id', this.value)` placeholder='Type to filter' value=embeddedfilter)
+                td.tcol_wide Description 
                 td.tcol_short Content
+                td.tcol_middle
+                    .dimension.dropdown-check-list(tabindex="100")
+                        span.label Origin 
+                        ul.characteristics 
+                            for og in origin
+                                li 
+                                    input(type='checkbox' checked=true onclick=`filterDimension('origin', '${og}', this.checked);`)
+                                    = og
+                td.tcol_middle
+                    .dimension.dropdown-check-list(tabindex="100")
+                        span.label Ground-truth annotators 
+                        ul.characteristics 
+                            for gta in groundtruthannotators
+                                li 
+                                    input(type='checkbox' checked=true onclick=`filterDimension('groundtruthannotators', '${gta}', this.checked);`)
+                                    = gta
+                td.tcol_middle
+                    .dimension.dropdown-check-list(tabindex="100")
+                        span.label Accessibility 
+                        ul.characteristics 
+                            for acc in accessibility
+                                li 
+                                    input(type='checkbox' checked=true onclick=`filterDimension('accessibility', '${acc}', this.checked);`)
+                                    = acc
+                td.tcol_middle
+                    .dimension.dropdown-check-list(tabindex="100")
+                        span.label References 
+                        ul.characteristics
+                            li 
+                                input.reflistfilter(type='text' oninput=`filterReflist('reference', 'refkey', this.value)` placeholder='Type to filter' value=refkeyfilter)
+                td.tcol_icon 
+                    i.fa-solid.fa-database
+
         tbody
             for ds in datasets 
-                tr
+                tr(id= ds.id)
                     td= ds.id
+                    if ds.groundtruthannotators != "None"
+                        td #{ds.embedded.map(e => e.id).join(', ')}
+                    else 
+                        td
                     td= ds.description 
                     td= `${ds.size} ${ds.granularity}s`
+                    td= ds.origin
+                    td= ds.groundtruthannotators
+                    td= ds.accessibility
+                    td(title=ds.reference.citation) 
+                        a(href=`/factors/${ds.reference._id}`)= ds.reference.refkey
+                    td
+                        if ds.sourcelink
+                            if ds.accessibility == "Available in Paper"
+                                i.fa-solid.fa-database(title=ds.sourcelink)
+                            else
+                                a(href=ds.sourcelink target='blank')
+                                    i.fa-solid.fa-database

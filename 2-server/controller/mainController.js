@@ -8,8 +8,8 @@ const Factor = require('../models/factor')
 const Dataset = require('../models/dataset')
 const Approach = require('../models/approach')
 
-let rawdata = fs.readFileSync('./../0-data/structure/ontology-1/taxonomy-0/quality-factor.json')
-let structure = JSON.parse(rawdata)
+let factors_structure = JSON.parse(fs.readFileSync('./../0-data/structure/ontology-1/taxonomy-0/quality-factor.json'))
+let datasets = JSON.parse(fs.readFileSync('./../0-data/structure/ontology-1/taxonomy-0/dataset.json'))
 
 
 exports.getLandingPage = async(req, res, next) => {
@@ -57,32 +57,22 @@ exports.getReferences = async(req, res, next) => {
     }
 }
 
-/*exports.getFactorsOfReference = async(req, res, next) => {
+exports.getDatasets = async(req, res, next) => {
     try {
-        const reference = await References.findById(req.params.rid);
-        const factors = await Factor.find({reference: req.params.rid})
-            .populate({path: 'descriptions', model: 'Description'})
-            .populate({path: 'reference', model: 'Reference'});;
+        //const version = await getVersion(req); 
+        var refkeyfilter =  await getReferenceFilter(req);
 
-        res.render('main/factors', {
-            reference: reference,
-            factors: factors, 
-            linguisticcomplexity: structure['attributes'].find(a => a['name'] == 'linguistic complexity')['characteristics'].map(c => c['value']),
-            scope: structure['attributes'].find(a => a['name'] == 'Scope')['characteristics'].map(c => c['value']),
-            aspects: structure['attributes'].find(a => a['name'] == 'aspect')['dimensions'].map(d => d['dimension']),
-            aspects_char: structure['attributes'].find(a => a['name'] == 'aspect')['characteristics'].map(c => c['value'])
-        });
-    } catch(error) {
-        next(error)
-    }
-}*/
-
-exports.getDatasetsOfReference = async(req, res, next) => {
-    try {
-        const dataset = await Dataset.find({reference: req.params.rid});
+        const dataset = await Dataset.find()
+            .populate({path: 'embedded', model: 'Description'})
+            .populate({path: 'reference', model: 'Reference'});
 
         res.render('main/datasets', {
-            datasets: dataset
+            datasets: dataset,
+            origin: datasets['attributes'].find(a => a['name'] == 'origin')['characteristics'].map(c => c['value']),
+            groundtruthannotators: datasets['attributes'].find(a => a['name'] == 'ground truth annotators')['characteristics'].map(c => c['value']),
+            accessibility: datasets['attributes'].find(a => a['name'] == 'accessibility')['characteristics'].map(c => c['value']),
+
+            refkeyfilter: refkeyfilter
         });
     } catch(error) {
         next(error)
@@ -112,10 +102,10 @@ exports.getFactors = async(req, res, next) => {
 
         res.render('main/factors', {
             factors: factors, 
-            linguisticcomplexity: structure['attributes'].find(a => a['name'] == 'linguistic complexity')['characteristics'].map(c => c['value']),
-            scope: structure['attributes'].find(a => a['name'] == 'Scope')['characteristics'].map(c => c['value']),
-            aspects: structure['attributes'].find(a => a['name'] == 'aspect')['dimensions'].map(d => d['dimension']),
-            aspects_char: structure['attributes'].find(a => a['name'] == 'aspect')['characteristics'].map(c => c['value']),
+            linguisticcomplexity: factors_structure['attributes'].find(a => a['name'] == 'linguistic complexity')['characteristics'].map(c => c['value']),
+            scope: factors_structure['attributes'].find(a => a['name'] == 'Scope')['characteristics'].map(c => c['value']),
+            aspects: factors_structure['attributes'].find(a => a['name'] == 'aspect')['dimensions'].map(d => d['dimension']),
+            aspects_char: factors_structure['attributes'].find(a => a['name'] == 'aspect')['characteristics'].map(c => c['value']),
 
             refkeyfilter: refkeyfilter
         });
@@ -124,6 +114,10 @@ exports.getFactors = async(req, res, next) => {
     }
 }
 
+
+/**
+ * Obtain the current version of which data is to be displayed
+ */
 getVersion = async function(req) {
     if(!req.session.version) {
         const currentVersion = await Version.find().sort({timestamp: -1});
@@ -137,6 +131,7 @@ getVersion = async function(req) {
  */
 getReferenceFilter = async function(req) {
     if(req.session.rid) {
+        console.log(req.session.rid)
         const rid = await References.findById(mongoose.Types.ObjectId(req.session.rid));
         req.session.rid = null;
         return rid.refkey;

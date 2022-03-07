@@ -5,9 +5,15 @@ function toggleExpander(classname) {
             object.style.display = 'none'
         }
     } else {
-        
         for(const object of objects) {
             object.style.display = ''
         }
+    }
+}
+
+function closeExpander(classname) {
+    const objects = document.getElementsByClassName(classname)
+    for(const object of objects) {
+        object.style.display = 'none'
     }
 }
