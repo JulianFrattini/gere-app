@@ -85,7 +85,7 @@ block content
                         span.label References 
                         ul.characteristics
                             li 
-                                input(type='text' oninput=`filterReflist('reference', 'refkey', this.value)` placeholder='Type to filter')
+                                input.reflistfilter(type='text' oninput=`filterReflist('reference', 'refkey', this.value)` placeholder='Type to filter' value=refkeyfilter)
                                 
         tbody
             for factor in factors 

@@ -1,5 +1,7 @@
 const fs = require('fs')
 
+const mongoose = require('mongoose')
+
 const Version = require('../models/version')
 const References = require('../models/reference')
 const Factor = require('../models/factor')
@@ -38,9 +40,12 @@ exports.getAllVersions = async(req, res, next) => {
     }
 }
 
-exports.getAllReferences = async(req, res, next) => {
+exports.getReferences = async(req, res, next) => {
     try {
-        const version = await Version.findById(req.params.vid)
+        const vid = await getVersion(req);
+        console.log(vid);
+        
+        const version = await Version.findById(vid)
             .populate({path: 'references', model: 'Reference'})
 
         res.render('main/references', {
@@ -97,6 +102,9 @@ exports.getApproachesOfReference = async(req, res, next) => {
 
 exports.getFactors = async(req, res, next) => {
     try {
+        //const version = await getVersion(req); 
+        var refkeyfilter =  await getReferenceFilter(req);
+
         const factors = await Factor.find()
             .populate({path: 'descriptions', model: 'Description'})
             .populate({path: 'reference', model: 'Reference'});
@@ -106,9 +114,31 @@ exports.getFactors = async(req, res, next) => {
             linguisticcomplexity: structure['attributes'].find(a => a['name'] == 'linguistic complexity')['characteristics'].map(c => c['value']),
             scope: structure['attributes'].find(a => a['name'] == 'Scope')['characteristics'].map(c => c['value']),
             aspects: structure['attributes'].find(a => a['name'] == 'aspect')['dimensions'].map(d => d['dimension']),
-            aspects_char: structure['attributes'].find(a => a['name'] == 'aspect')['characteristics'].map(c => c['value'])
+            aspects_char: structure['attributes'].find(a => a['name'] == 'aspect')['characteristics'].map(c => c['value']),
+
+            refkeyfilter: refkeyfilter
         });
     } catch(error) {
         next(error)
     }
+}
+
+getVersion = async function(req) {
+    if(!req.session.version) {
+        const currentVersion = await Version.find().sort({timestamp: -1});
+        req.session.version = currentVersion[0]._id;
+    } 
+    return req.session.version;
+}
+
+/**
+ * Obtain the reference filter: if the current session filters for a specific reference, obtain the refkey and reset the filter
+ */
+getReferenceFilter = async function(req) {
+    if(req.session.rid) {
+        const rid = await References.findById(mongoose.Types.ObjectId(req.session.rid));
+        req.session.rid = null;
+        return rid.refkey;
+    }
+    return '';
 }

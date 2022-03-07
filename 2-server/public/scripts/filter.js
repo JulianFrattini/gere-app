@@ -39,6 +39,14 @@ window.onload = function() {
                 filter.classList.add('visible');
         }
     }
+
+    // for all reflistfilters: check, if there is an initial value in the filter
+    for(const reflistfilter of document.getElementsByClassName('reflistfilter')) {
+        if(reflistfilter.value != '') {
+            // if there is a value, trigger an input event to apply the filter
+            reflistfilter.dispatchEvent(new Event('input', {bubbles: true}));
+        }
+    }
 }
 
 function filterDimension(dimension, characteristic, visible) {
