@@ -4,11 +4,11 @@ FROM nikolaik/python-nodejs:latest
 WORKDIR /rqfo
 
 # install requirements
-COPY requirements.txt .
-RUN pip install -r requirements.txt
+#COPY requirements.txt .
+#RUN pip install -r requirements.txt
 
 # install node dependencies
-COPY package.json package-lock.json ./
+COPY package.json ./
 RUN npm install
 
 # copy the rest of the content
