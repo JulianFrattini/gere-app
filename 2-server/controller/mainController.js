@@ -42,9 +42,10 @@ exports.getAllVersions = async(req, res, next) => {
 
 exports.getReferences = async(req, res, next) => {
     try {
+        // obtain the current version to be displayed
         const vid = await getVersion(req);
-        console.log(vid);
         
+        // dinf the version object and populate it with all included references
         const version = await Version.findById(vid)
             .populate({path: 'references', model: 'Reference'})
 

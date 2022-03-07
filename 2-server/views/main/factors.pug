@@ -19,8 +19,6 @@ block content
                         ul.characteristics
                             li 
                                 input(type='text' oninput=`filterScopenote('name', this.value)` placeholder='Type to filter')
-                //- td.tcol_span Description 
-                //- td.tcol_span Impact
                 td.tcol_middle
                     .dimension.dropdown-check-list(tabindex="100")
                         span.label Complexity 
@@ -89,11 +87,9 @@ block content
                                 
         tbody
             for factor in factors 
-                tr(id= factor.id)
+                tr.trow_clickable(id= factor.id onclick=`toggleExpander('${factor.id}D')`)
                     td= factor.id
                     td= factor.name 
-                    //- td= factor.descriptions[0].definition
-                    //- td= factor.descriptions[0].impact
                     td= factor.linguisticcomplexity
                     td= factor.scope
                     for aspect in aspects 
@@ -106,3 +102,15 @@ block content
                         else
                             td.tc_obsole
                     td #{factor.reference.map(r => r.refkey).join(', ')}
+                
+                tr.trow_midline.expandable(class= `${factor.id}D`)
+                    td 
+                    td(colspan=3) Definition(s)
+                    td(colspan=aspects.length) Impact
+                    td Reference
+                for description in factor.descriptions
+                    tr.expandable.trow_minor(class= `${factor.id}D`)
+                        td 
+                        td(colspan=3)= description.definition
+                        td(colspan=aspects.length)= description.impact
+                        td

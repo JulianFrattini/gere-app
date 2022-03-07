@@ -17,6 +17,20 @@ th, td {
     padding: 5px;
 }
 
+.trow_clickable {
+    cursor: pointer;
+}
+
+.trow_midline {
+    background: rgb(242, 242, 242);
+    font-style: italic;
+}
+
+.trow_minor {
+    font-size: 0.9em;
+    vertical-align: text-top;
+}
+
 .tcol_icon {
     width: 20px;
     cursor: help;

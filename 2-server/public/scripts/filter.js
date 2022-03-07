@@ -47,6 +47,12 @@ window.onload = function() {
             reflistfilter.dispatchEvent(new Event('input', {bubbles: true}));
         }
     }
+
+    // initially: hida all expandable objects
+    for(const expandable of document.getElementsByClassName('expandable')) {
+        console.log(expandable)
+        expandable.style.display = 'none'
+    }
 }
 
 function filterDimension(dimension, characteristic, visible) {
@@ -122,4 +128,18 @@ function filterReflist(attribute, key, text) {
         }
     }
     
+}
+
+function toggleExpander(classname) {
+    const objects = document.getElementsByClassName(classname)
+    if(objects[0].style.display == '') {
+        for(const object of objects) {
+            object.style.display = 'none'
+        }
+    } else {
+        
+        for(const object of objects) {
+            object.style.display = ''
+        }
+    }
 }
