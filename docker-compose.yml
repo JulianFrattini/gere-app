@@ -9,12 +9,12 @@ services:
         working_dir: /rqfo
         tty: true
         ports:
-            - "3002:3002"
+            - "3002:8044"
         depends_on:
             - mongo
         networks:
             rqfo:
-                ipv4_address: 172.19.0.3
+                ipv4_address: 172.24.0.3
     mongo:
         container_name: rqfo_db
         image: mongo
@@ -23,11 +23,11 @@ services:
         - './data:/data/db'
         networks:
             rqfo:
-                ipv4_address: 172.19.0.2
+                ipv4_address: 172.24.0.2
 
 networks:
     rqfo:
         driver: bridge
         ipam:
             config:
-            - subnet: 172.19.0.0/16
+            - subnet: 172.24.0.0/16
