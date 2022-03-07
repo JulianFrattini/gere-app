@@ -55,7 +55,8 @@ exports.getFactorsOfReference = async(req, res, next) => {
     try {
         const reference = await References.findById(req.params.rid);
         const factors = await Factor.find({reference: req.params.rid})
-            .populate({path: 'descriptions', model: 'Description'});
+            .populate({path: 'descriptions', model: 'Description'})
+            .populate({path: 'reference', model: 'Reference'});;
 
         res.render('main/factors', {
             reference: reference,
@@ -88,6 +89,24 @@ exports.getApproachesOfReference = async(req, res, next) => {
 
         res.render('main/approaches', {
             approaches: approaches
+        });
+    } catch(error) {
+        next(error)
+    }
+}
+
+exports.getFactors = async(req, res, next) => {
+    try {
+        const factors = await Factor.find()
+            .populate({path: 'descriptions', model: 'Description'})
+            .populate({path: 'reference', model: 'Reference'});
+
+        res.render('main/factors', {
+            factors: factors, 
+            linguisticcomplexity: structure['attributes'].find(a => a['name'] == 'linguistic complexity')['characteristics'].map(c => c['value']),
+            scope: structure['attributes'].find(a => a['name'] == 'Scope')['characteristics'].map(c => c['value']),
+            aspects: structure['attributes'].find(a => a['name'] == 'aspect')['dimensions'].map(d => d['dimension']),
+            aspects_char: structure['attributes'].find(a => a['name'] == 'aspect')['characteristics'].map(c => c['value'])
         });
     } catch(error) {
         next(error)

@@ -6,7 +6,8 @@ block append head
 
 block content
     h2 Factors
-    p= reference.citation
+    if reference
+        p= reference.citation
 
     table 
         thead 
@@ -79,7 +80,12 @@ block content
                                 i.fa-solid.fa-clipboard-list.ficon_default
                             else 
                                 i.fa-solid.fa-circle-dot.ficon_default
-                        //- #{aspect.substr(0, 1)} 
+                td.tcol_middle
+                    .dimension.dropdown-check-list(tabindex="100")
+                        span.label References 
+                        ul.characteristics
+                            li 
+                                input(type='text' oninput=`filterReflist('reference', 'refkey', this.value)` placeholder='Type to filter')
                                 
         tbody
             for factor in factors 
@@ -99,3 +105,4 @@ block content
                             td.tc_good(title='positive impact') +
                         else
                             td.tc_obsole
+                    td #{factor.reference.map(r => r.refkey).join(', ')}

@@ -83,3 +83,35 @@ function filterScopenote(attribute, text) {
     }
     
 }
+
+/**
+ * Filter the subjects by whether a specific reflist contains at least one reference where the key contains the text
+ * @param {String} attribute The name of the attribute in the current subjects which refers to another subject
+ * @param {String} key The name of the id of the referred to subject (e.g., refkey for references)
+ * @param {String} text The text to filter by
+ */
+function filterReflist(attribute, key, text) {
+    for(const subject of subjects) {
+        const entry = document.getElementById(subject[id]);
+
+        if(text == "") {
+            // in case the filter text is empty, display all subjects
+            entry.style.display = ''
+        } else {
+            // in case the filter text is not empty, search if among the reference in the reflist one subject's key value contains the text
+            var keyFound = false;
+            for(const reference of subject[attribute]) {
+                if(reference[key].includes(text)) {
+                    entry.style.display = '';
+                    keyFound = true;
+                    break;
+                }
+            }
+
+            if(!keyFound) {
+                entry.style.display = 'none';
+            }
+        }
+    }
+    
+}
