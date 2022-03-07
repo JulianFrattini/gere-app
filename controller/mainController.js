@@ -8,8 +8,8 @@ const Factor = require('../models/factor')
 const Dataset = require('../models/dataset')
 const Approach = require('../models/approach')
 
-let factors_structure = JSON.parse(fs.readFileSync('./../0-data/structure/ontology-1/taxonomy-0/quality-factor.json'))
-let datasets = JSON.parse(fs.readFileSync('./../0-data/structure/ontology-1/taxonomy-0/dataset.json'))
+let factors_structure = JSON.parse(fs.readFileSync('./data/raw/structure/ontology-1/taxonomy-0/quality-factor.json'))
+let datasets = JSON.parse(fs.readFileSync('./data/raw/structure/ontology-1/taxonomy-0/dataset.json'))
 
 
 exports.getLandingPage = async(req, res, next) => {

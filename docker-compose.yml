@@ -1,0 +1,33 @@
+version: "3.7"
+
+services:
+    app:
+        container_name: rqfo_app
+        build: .
+        image: nikolaik/python-nodejs:python3.6-nodejs15
+        restart: always
+        working_dir: /rqfo
+        tty: true
+        ports:
+            - "3002:3002"
+        depends_on:
+            - mongo
+        networks:
+            rqfo:
+                ipv4_address: 172.19.0.3
+    mongo:
+        container_name: rqfo_db
+        image: mongo
+        restart: always
+        volumes:
+        - './data:/1-database/data/db'
+        networks:
+            rqfo:
+                ipv4_address: 172.19.0.2
+
+networks:
+    rqfo:
+        driver: bridge
+        ipam:
+            config:
+            - subnet: 172.19.0.0/16

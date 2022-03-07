@@ -103,3 +103,5 @@ dist
 # TernJS port file
 .tern-port
 1-database/data/db/
+data/db/_mdb_catalog.wt
+data/
