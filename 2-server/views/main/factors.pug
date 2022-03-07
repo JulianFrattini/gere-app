@@ -100,17 +100,17 @@ block content
                         else if factor[aspect] == '+'
                             td.tc_good(title='positive impact') +
                         else
-                            td.tc_obsole
+                            td.tc_obsolete
                     td #{factor.reference.map(r => r.refkey).join(', ')}
                 
                 tr.trow_midline.expandable(class= `${factor.id}D`)
-                    td 
+                    td ID
                     td(colspan=3) Definition(s)
                     td(colspan=aspects.length) Impact
                     td Reference
                 for description in factor.descriptions
                     tr.expandable.trow_minor(class= `${factor.id}D`)
-                        td 
+                        td= description.id
                         td(colspan=3)= description.definition
                         td(colspan=aspects.length)= description.impact
-                        td
+                        td #{factor.reference.find(r => String(r._id) == String(description.reference._id)).refkey}

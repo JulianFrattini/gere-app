@@ -106,7 +106,7 @@ exports.getFactors = async(req, res, next) => {
         //const version = await getVersion(req); 
         var refkeyfilter =  await getReferenceFilter(req);
 
-        const factors = await Factor.find()
+        const factors = await Factor.find().sort({'id': 1})
             .populate({path: 'descriptions', model: 'Description'})
             .populate({path: 'reference', model: 'Reference'});
 

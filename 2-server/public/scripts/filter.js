@@ -50,7 +50,6 @@ window.onload = function() {
 
     // initially: hida all expandable objects
     for(const expandable of document.getElementsByClassName('expandable')) {
-        console.log(expandable)
         expandable.style.display = 'none'
     }
 }
