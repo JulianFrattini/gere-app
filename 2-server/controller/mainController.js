@@ -57,7 +57,7 @@ exports.getReferences = async(req, res, next) => {
     }
 }
 
-exports.getFactorsOfReference = async(req, res, next) => {
+/*exports.getFactorsOfReference = async(req, res, next) => {
     try {
         const reference = await References.findById(req.params.rid);
         const factors = await Factor.find({reference: req.params.rid})
@@ -75,7 +75,7 @@ exports.getFactorsOfReference = async(req, res, next) => {
     } catch(error) {
         next(error)
     }
-}
+}*/
 
 exports.getDatasetsOfReference = async(req, res, next) => {
     try {

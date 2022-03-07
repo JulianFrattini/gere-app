@@ -1,5 +1,5 @@
 .ficon_default {
-    color: grey
+    color: rgb(49, 46, 46)
 }
 
 .ficon_positive {
@@ -8,4 +8,8 @@
 
 .ficon_negative {
     color: rgb(192, 0, 0);
+}
+
+.ficon_unknown {
+    color: grey;
 }

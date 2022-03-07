@@ -2,7 +2,8 @@ extends ../layout
 
 block append head
     link(rel='stylesheet' href='/stylesheets/filterbox.css')
-    script(src='/scripts/filter.js' subjects=`${JSON.stringify(factors)}` triplevalues=`${JSON.stringify(aspects_char)}`)
+    script(src='/scripts/filter.js' subjects=`${JSON.stringify(factors)}` triplevalues=`${JSON.stringify(aspects_char)}` cycles=[{id: 'triple', values: {positive: aspects_char[1], negative: aspects_char[0], unknown: aspects_char[2]}}, {id: 'tuple', values: {positive: true, negative: false}}])
+    script(src='/scripts/toggleExpander.js')
 
 block content
     h2 Factors
@@ -36,7 +37,7 @@ block content
                                     input(type='checkbox' checked=true onclick=`filterDimension('scope', '${sc}', this.checked);`)
                                     = sc
                 for aspect in aspects 
-                    td.tcol_icon.ficon_default(title=`${aspect} (click to filter)` onclick=`filterTriple('${aspect}', this)`) 
+                    td.tcol_icon.ficon_default(title=`${aspect} (click to filter)` onclick=`cycleDimension('${aspect}', null, 'triple', this)`) 
                         span
                             if aspect == 'adequacy'
                                 i.fa-brands.fa-black-tie.ficon_default
@@ -84,6 +85,10 @@ block content
                         ul.characteristics
                             li 
                                 input.reflistfilter(type='text' oninput=`filterReflist('reference', 'refkey', this.value)` placeholder='Type to filter' value=refkeyfilter)
+                td.tcol_icon.ficon_default(title='Empirical Evidence (click to filter)' onclick=`cycleDimension('descriptions', 'empiricalevidence', 'tuple', this)`) 
+                    i.fa-solid.fa-receipt.ficon_default
+                td.tcol_icon.ficon_default(title='Practitioners Involved (click to filter)' onclick=`cycleDimension('descriptions', 'practitionersinvolved', 'tuple', this)`) 
+                    i.fa-solid.fa-user.ficon_default
                                 
         tbody
             for factor in factors 
@@ -102,15 +107,37 @@ block content
                         else
                             td.tc_obsolete
                     td #{factor.reference.map(r => r.refkey).join(', ')}
+                    if factor.descriptions.find(d => d.empiricalevidence) != null
+                        td.tc_good(title='At least one description provides empirical evidence for this factor')
+                    else
+                        td.tc_bad(title='No description provides empirical evidence for this factor')
+                    if factor.descriptions.find(d => d.practitionersinvolved) != null
+                        td.tc_good(title='At least one description had practitioners involved')
+                    else
+                        td.tc_bad(title='No description had practitioners involved')
                 
                 tr.trow_midline.expandable(class= `${factor.id}D`)
                     td ID
                     td(colspan=3) Definition(s)
                     td(colspan=aspects.length) Impact
                     td Reference
+                    td 
+                    td 
                 for description in factor.descriptions
                     tr.expandable.trow_minor(class= `${factor.id}D`)
                         td= description.id
                         td(colspan=3)= description.definition
                         td(colspan=aspects.length)= description.impact
-                        td #{factor.reference.find(r => String(r._id) == String(description.reference._id)).refkey}
+
+                        - var ref = factor.reference.find(r => String(r._id) == String(description.reference._id))
+                        td(title=ref.citation)= ref.refkey
+
+                        if description.empiricalevidence
+                            td.tc_good(title='This description provides empirical evidence for this factor')
+                        else
+                            td.tc_bad(title='This description does not provide empirical evidence for this factor') 
+
+                        if description.practitionersinvolved
+                            td.tc_good(title='This description had practitioners involved')
+                        else
+                            td.tc_bad(title='This description did not have practitioners involved')

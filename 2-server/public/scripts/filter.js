@@ -1,16 +1,19 @@
 // parse the subjects which are displayed in the rows of the table
 const subjects = JSON.parse(document.currentScript.getAttribute('subjects'));
 
-// in case there is a dimension with a limited number of characteristics (like a triple), build a status carousel to cycle through
-var statuscarousel = null
-if(document.currentScript.getAttributeNames().includes('triplevalues')) {
-    const triplevalues = JSON.parse(document.currentScript.getAttribute('triplevalues'));
-    statuscarousel = [
-        { class: 'ficon_positive', color: 'rgb(146, 208, 80)', tooltipaddendum: ' is positive', value: triplevalues[1]}, 
-        { class: 'ficon_negative', color: 'rgb(192, 0, 0)', tooltipaddendum: ' is negative', value: triplevalues[0]}, 
-        { class: 'ficon_unknown', color: 'grey', tooltipaddendum: ' is unknown', value: triplevalues[2] },
-        { class: 'ficon_default', color: 'rgb(49, 46, 46)', tooltipaddendum: '' }
-    ]
+
+var cycles = {};
+if(document.currentScript.getAttributeNames().includes('cycles')) {
+    const cs = JSON.parse(document.currentScript.getAttribute('cycles'));
+    for(const c of cs) {
+        cycles[c.id] = [{ class: 'ficon_default', color: 'rgb(49, 46, 46)', tooltipaddendum: '' }];
+        if(Object.keys(c.values).includes("positive"))
+            cycles[c.id].push({ class: 'ficon_positive', color: 'rgb(146, 208, 80)', tooltipaddendum: ' is positive', value: c.values.positive})
+        if(Object.keys(c.values).includes("negative"))
+            cycles[c.id].push({ class: 'ficon_negative', color: 'rgb(192, 0, 0)', tooltipaddendum: ' is negative', value: c.values.negative})
+        if(Object.keys(c.values).includes("unknown"))
+            cycles[c.id].push({ class: 'ficon_unknown', color: 'grey', tooltipaddendum: ' is unknown', value: c.values.unknown})
+    }
 }
 
 // override the id property if necessary
@@ -18,6 +21,9 @@ var id = 'id'
 if(document.currentScript.getAttributeNames().includes("id")) {
     id = document.currentScript.getAttribute('id');
 }
+
+// filter object containing all pairs of key -> expected value
+var filters = []
 
 window.onload = function() {
     for(const dimension of document.getElementsByClassName('dimension')) {
@@ -54,47 +60,158 @@ window.onload = function() {
     }
 }
 
-function filterDimension(dimension, characteristic, visible) {
+function filter() {
+    console.log(filters);
     for(const subject of subjects) {
-        if(subject[dimension].toLowerCase() == characteristic.toLowerCase()) {
-            document.getElementById(subject[id]).style.display = visible ? '' : 'none'
-        }
-    }
-}
+        if(filters.length == 0) {
+            // if no filter is active, display all elements
+            document.getElementById(subject[id]).style.display = ''
+        } else {
+            violatesFilter = false
+            for(const f of filters) {
+                if(f.type == 'remove') {
+                    if(f.filtered.includes(subject[f.attribute].toLowerCase())) {
+                        violatesFilter = true;
+                        break;
+                    }
+                } else if(f.type == 'allow') {
+                    if(f.subdimension == null) {
+                        if(f.characteristic != subject[f.attribute]) {
+                            violatesFilter = true;
+                            break;
+                        }
+                    } else {
+                        if(subject[f.attribute].find(d => d[f.subdimension] == f.characteristic) == null) {
+                            violatesFilter = true;
+                            break;
+                        }
+                    }
+                } else if(f.type == 'contains') {
+                    if(!subject[f.attribute].toLowerCase().includes(f.text)) {
+                        violatesFilter = true;
+                        break;
+                    }
+                } else if(f.type == 'refersto') {
+                    var keyFound = false;
+                    for(const reference of subject[f.attribute]) {
+                        if(reference[f.key].includes(f.text)) {
+                            keyFound = true;
+                            break;
+                        }
+                    }
 
-function filterTriple(dimension, icon) {
-    for(const status of statuscarousel) {
-        if(icon.classList.contains(status.class)) {
-            const index = statuscarousel.indexOf(status)
-            const nextindex = (index+1)%(statuscarousel.length)
-            
-            icon.classList.remove(statuscarousel[index].class);
-            icon.classList.add(statuscarousel[nextindex].class);
-            icon.style.color = statuscarousel[nextindex].color
-            icon.title = `${dimension}` + statuscarousel[nextindex].tooltipaddendum + ' (click to filter)'
-
-            for(const subject of subjects) {
-                if('value' in statuscarousel[nextindex]) {
-                    document.getElementById(subject[id]).style.display = subject[dimension] == statuscarousel[nextindex].value ? '' : 'none'
-                } else {
-                    document.getElementById(subject[id]).style.display = ''
+                    if(!keyFound) {
+                        violatesFilter = true;
+                        break;
+                    }
                 }
             }
-            break
+
+            document.getElementById(subject[id]).style.display = violatesFilter ? 'none' : ''
         }
     }
 }
 
-function filterScopenote(attribute, text) {
-    for(const subject of subjects) {
-        const entry = document.getElementById(subject[id]);
-        if(text == "") {
-            entry.style.display = ''
+/**
+ * Add a filter to a dimension, where the given characteristic of a dimension is either allowed or not allowed
+ * @param {String} dimension The dimension on which is filtered
+ * @param {String} characteristic The characteristic which will be allowed or not allowed
+ * @param {boolean} allowed True, if the characteristic is allowed, false if not
+ */
+function filterDimension(dimension, characteristic, allowed) {
+    var f = filters.find(f => f.attribute == dimension);
+    if(f == undefined) {
+        if(!allowed) {
+            filters.push({
+                attribute: dimension,
+                type: 'remove',
+                filtered: [characteristic]
+            });
+        }
+    } else {
+        if(!allowed) {
+            f.filtered.push(characteristic);
         } else {
-            entry.style.display = subject[attribute].toLowerCase().includes(text) ? '' : 'none'
+            const index = f.filtered.indexOf(characteristic)
+            if(index >= 0) {
+                f.filtered.splice(index, 1)
+            }
+
+            // in case this was the only characteristic that was prevented in the dimension, remove the filter alltogether
+            if(f.filtered.length == 0) {
+                filters.splice(filters.indexOf(f), 1);
+            }
         }
     }
-    
+
+    filter();
+}
+
+function cycleDimension(dimension, subdimension, cycleid, icon) {
+    const cycle = cycles[cycleid]
+    for(const status of cycle) {
+        if(icon.classList.contains(status.class)) {
+            const index = cycle.indexOf(status);
+            const nextstatus = cycle[(index+1)%(cycle.length)]
+
+            icon.classList.remove(status.class);
+            icon.classList.add(nextstatus.class);
+            icon.style.color = nextstatus.color
+            icon.title = `${dimension}` + nextstatus.tooltipaddendum + ' (click to filter)'
+
+            var f = filters.find(f => f.attribute == dimension);
+            if(f == undefined) {
+                if('value' in nextstatus) {
+                    filters.push({
+                        attribute: dimension,
+                        subdimension: subdimension,
+                        type: 'allow',
+                        characteristic: nextstatus.value
+                    });
+                }
+            } else {
+                if('value' in nextstatus) {
+                    f.characteristic = nextstatus.value;
+                } else {
+                    filters.splice(filters.indexOf(f), 1);
+                }
+            }
+
+            break;
+        }
+    }
+
+    filter();
+}
+
+/**
+ * Add an additional filter, where the given scope note must contain the given text
+ * @param {String} attribute The scope note that shall be filtered by
+ * @param {*} text The string which the scope note has to contain
+ */
+function filterScopenote(attribute, text) {
+    // identify, whethere there is already a filter on this scope note
+    var f = filters.find(f => f.attribute == attribute);
+    if(f == undefined) {
+        // if not (and the text is not empty) create a new filter for the scope note
+        if(text != "") {
+            filters.push({
+                attribute: attribute,
+                type: 'contains',
+                text: text
+            });
+        }
+    } else {
+        // if yes, update the filter by reassigning the text
+        if(text != "") {
+            f.text = text;
+        } else {
+            // if the text is empty, remove the filter alltogether
+            filters.splice(filters.indexOf(f), 1);
+        }
+    }
+
+    filter();
 }
 
 /**
@@ -104,41 +221,27 @@ function filterScopenote(attribute, text) {
  * @param {String} text The text to filter by
  */
 function filterReflist(attribute, key, text) {
-    for(const subject of subjects) {
-        const entry = document.getElementById(subject[id]);
-
-        if(text == "") {
-            // in case the filter text is empty, display all subjects
-            entry.style.display = ''
-        } else {
-            // in case the filter text is not empty, search if among the reference in the reflist one subject's key value contains the text
-            var keyFound = false;
-            for(const reference of subject[attribute]) {
-                if(reference[key].includes(text)) {
-                    entry.style.display = '';
-                    keyFound = true;
-                    break;
-                }
-            }
-
-            if(!keyFound) {
-                entry.style.display = 'none';
-            }
-        }
-    }
-    
-}
-
-function toggleExpander(classname) {
-    const objects = document.getElementsByClassName(classname)
-    if(objects[0].style.display == '') {
-        for(const object of objects) {
-            object.style.display = 'none'
+    // identify, whethere there is already a filter on this reflist
+    var f = filters.find(f => f.attribute == attribute);
+    if(f == undefined) {
+        // if not (and the text is not empty) create a new filter for the reflist
+        if(text != "") {
+            filters.push({
+                attribute: attribute,
+                type: 'refersto',
+                key: key,
+                text: text
+            });
         }
     } else {
-        
-        for(const object of objects) {
-            object.style.display = ''
+        // if yes, update the filter by reassigning the text
+        if(text != "") {
+            f.text = text;
+        } else {
+            // if the text is empty, remove the filter alltogether
+            filters.splice(filters.indexOf(f), 1);
         }
     }
+
+    filter();
 }
