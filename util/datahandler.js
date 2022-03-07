@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const clone = require('git-clone')
 
-const datapath = './../0-data'
+const datapath = '../data/raw'
 
 module.exports = {
 

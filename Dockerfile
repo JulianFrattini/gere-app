@@ -3,10 +3,6 @@ FROM nikolaik/python-nodejs:latest
 # set the working directory
 WORKDIR /rqfo
 
-# install requirements
-#COPY requirements.txt .
-#RUN pip install -r requirements.txt
-
 # install node dependencies
 COPY package.json ./
 RUN npm install
