@@ -6,10 +6,15 @@ const extractionSchema = new mongoose.Schema({
         unique: true,
         required: true
     },
+    versions: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Version'
+    }],
     extractor: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Contributor'
     }, 
+    
     factors: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Factor'

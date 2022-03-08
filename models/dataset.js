@@ -6,6 +6,10 @@ const schema = new mongoose.Schema({
         required: true,
         unique: true,
     },
+    versions: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Version'
+    }],
     reference: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Reference'
@@ -20,12 +24,12 @@ const schema = new mongoose.Schema({
     },
     origin: {
         type: String,
-        enum: ["Practitioner Data", "Student Data", "Mocked Data", "Unknown"],
+        enum: ["practitioner data", "student data", "mocked data", "unknown"],
         required: true
     },
     groundtruthannotators: {
         type: String,
-        enum: ["Practitioners", "Researchers", "Students", "Authors", "Inherent", "None", "Unknown"],
+        enum: ["practitioners", "researchers", "students", "authors", "inherent", "none", "unknown"],
         required: true
     },
     size: {
@@ -34,12 +38,12 @@ const schema = new mongoose.Schema({
     }, 
     granularity: {
         type: String,
-        enum: ["Word", "Phrase", "Sentence", "Structured/tabular text", "User Story", "Use Case", "Requirement", "Section", "Document", "Global"],
+        enum: ["word", "phrase", "sentence", "structured/tabular text", "user story", "use case", "requirement", "section", "document", "global"],
         required: true
     },
     accessibility: {
         type: String,
-        enum: ["Available in Paper", "Open Access Link", "Open Access", "Reachable Link", "Broken Link", "No Link", "Upon Request", "Private"],
+        enum: ["available in paper", "open access link", "open access", "reachable link", "broken link", "no link", "upon request", "private"],
         required: true
     },
     sourcelink: {

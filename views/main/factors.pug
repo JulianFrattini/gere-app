@@ -41,13 +41,13 @@ block content
                         span
                             if aspect == 'adequacy'
                                 i.fa-brands.fa-black-tie.ficon_default
-                            else if aspect == 'ambiguity'
+                            else if aspect == 'unambiguouseness'
                                 i.fa-solid.fa-hands-asl-interpreting.ficon_default
                             else if aspect == 'atomicity'
                                 i.fa-solid.fa-atom.ficon_default
                             else if aspect == 'completeness'
                                 i.fa-solid.fa-circle.ficon_default
-                            else if aspect == 'complexity'
+                            else if aspect == 'simplicity'
                                 i.fa-solid.fa-bezier-curve.ficon_default
                             else if aspect == 'compliance'
                                 i.fa-solid.fa-section.ficon_default
@@ -55,7 +55,7 @@ block content
                                 i.fa-solid.fa-circle-check.ficon_default
                             else if aspect == 'consistency'
                                 i.fa-solid.fa-code-compare.ficon_default
-                            else if aspect == 'design-independence'
+                            else if aspect == 'designindependence'
                                 i.fa-solid.fa-palette.ficon_default
                             else if aspect == 'feasibility'
                                 i.fa-solid.fa-code-pull-request.ficon_default
@@ -65,7 +65,7 @@ block content
                                 i.fa-solid.fa-code-fork.ficon_default
                             else if aspect == 'precision'
                                 i.fa-solid.fa-crosshairs.ficon_default
-                            else if aspect == 'redundancy'
+                            else if aspect == 'necessity'
                                 i.fa-solid.fa-copy.ficon_default
                             else if aspect == 'relevancy'
                                 i.fa-solid.fa-newspaper.ficon_default
@@ -99,11 +99,11 @@ block content
                     td= factor.scope
                     for aspect in aspects 
                         if factor[aspect] == '?'
-                            td.tc_unknown(title='unknown impact') 
+                            td.tc_unknown(title=`unknown impact on ${aspect}`) 
                         else if factor[aspect] == '-'
-                            td.tc_bad(title='negative impact') -
+                            td.tc_bad(title=`negative impact on ${aspect}`) -
                         else if factor[aspect] == '+'
-                            td.tc_good(title='positive impact') +
+                            td.tc_good(title=`positive impact on ${aspect}`) +
                         else
                             td.tc_obsolete
                     td #{factor.reference.map(r => r.refkey).join(', ')}
@@ -129,7 +129,7 @@ block content
                         td(colspan=3)= description.definition
                         td(colspan=aspects.length)= description.impact
 
-                        - var ref = factor.reference.find(r => String(r._id) == String(description.reference._id))
+                        - var ref = factor.reference.find(r => String(r._id) == String(description.reference))
                         td(title=ref.citation)= ref.refkey
 
                         if description.empiricalevidence

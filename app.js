@@ -12,7 +12,7 @@ const versionsRouter = require('./routes/versions')
 const subjectRouter = require('./routes/subject')
 
 // setup connection to mongoDB
-mongoose.connect('mongodb://mongo:27017/rqft', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect('mongodb://127.0.0.1:27017/rqfo', { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.Promise = global.Promise;
 mongoose.connection.on('error', (error) => console.error(error.message));
 

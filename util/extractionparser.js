@@ -1,4 +1,5 @@
 const fs = require('fs')
+const jsonp = require('./jsonparser.js')
 
 const Contributor = require('../models/contributor')
 const Version = require('../models/version')
@@ -11,307 +12,374 @@ const Description = require('../models/description')
 const Dataset = require('../models/dataset')
 const Approach = require('../models/approach')
 
-const datapath = './../0-data/'
-
 module.exports = {
     parseData: async function() {
         // obtain and update all contributors
-        contributors = readJson('contributors.json')
-        updateContributors(contributors)
+        const contributorData = jsonp.readFile('contributors.json')
+        const contributors = await updateContributors(contributorData);
 
         // obtain all structure files
 
         // get all versions
-        rqftvs = await parseFiles('versions')
-        rqftex = await parseFilesToMap('extractions')
-        //console.log(rqftex)
+        const allversions = await jsonp.parseFiles('versions');
+        const allextractions = await jsonp.parseFilesToMap('extractions');
 
         // determine, which versions have not yet been fully parsed
-        await updateVersions(rqftvs, rqftex)
-
-        // for each not fully parsed version: determine new extractions
+        await updateVersions(allversions, allextractions, contributors);
 
         return true
     }
 }
 
-readJson = function(filename) {
-    let rawdata = fs.readFileSync(datapath + filename)
-    let json = JSON.parse(rawdata)
-    return json
-}
-
-updateContributors = async function(contributors) {
+updateContributors = async function(contributorData) {
     // check for each contributor if they are already contained in the database
-    for(const contributor of contributors) {
-        var dbcont = await Contributor.findOne({acronym: contributor['acronym']})
+    for(const contributor of contributorData) {
+        var dbcont = await Contributor.findOne({acronym: contributor['id']})
         
         // add the contributor if it does not yet exist
         if (dbcont == null) {
             dbcont = new Contributor({
                 name: contributor['name'],
-                acronym: contributor['acronym']
-            })
-            await dbcont.save()
+                acronym: contributor['id']
+            });
+            await dbcont.save();
         }
     }
+
+    const contributors = await Contributor.find();
+    return contributors;
 }
 
-parseFiles = function(folder) {
-    return new Promise((resolve, reject) => {
-        var rqftvs = []
-        fs.readdir(datapath + folder, (err, files) => {
-            if (err) throw reject();
-          
-            for (const file of files) {
-                json = readJson(folder+'/'+file)
-                rqftvs.push(json)
-            }
-            resolve(rqftvs)
-        });
-    });
-}
-
-parseFilesToMap = function(folder) {
-    return new Promise((resolve, reject) => {
-        var result = {}
-        fs.readdir(datapath + folder, (err, files) => {
-            if (err) throw reject();
-          
-            for (const file of files) {
-                json = readJson(folder+'/'+file)
-                result[file.split('.')[0]] = json
-            }
-            resolve(result)
-        });
-    });
-}
-
-updateVersions = async function(versions, extractions) {
+updateVersions = async function(versions, extractions, contributors) {
     // TODO order versions by timestamp
 
     for(const version of versions) {
         // check if the version already exists in the current database
-        var v = await Version.findOne({
-            ontology: version['version']['ontology'],
-            taxonomy: version['version']['taxonomy'],
-            content: version['version']['content']
-        })
+        const vcode = version['version'];
+        var v = await Version.findOne({ontology: vcode['ontology'], taxonomy: vcode['taxonomy'], content: vcode['content']});
         
-        // if the version does not yet exist in the database, add it 
         if(v == null) {
-            console.log('Version v' + version['version']['ontology'] + '.' + version['version']['taxonomy'] + '.' + version['version']['content'] + ' does not yet exist in the database.')
-
-            // check all references 
-            allreferences = Object.keys(version['extraction']['current'])
-            allextractions = allreferences.map(k => version['extraction']['current'][k])
-
-            var reflist = []
-            for(const rk of allreferences) {
-                var reference = null;
-                const ref = await Reference.find({refkey: rk})
-
-                // if the reference does not yet exist, find the extraction that specifies it
-                if(ref.length == 0) {
-                    console.log('Reference ' + rk + ' does not yet exist in the database.');
-
-                    var refinfo = getExtractionWhichSpecifiesReference(extractions, rk);
-                    reference = new Reference({
-                        refkey: refinfo['ID'],
-                        citation: refinfo['Refstring']
-                    });
-                    await reference.save()
-                } else {
-                    reference = ref[0]
-                }
-
-                reflist.push(reference._id)
-            }
-
-            extractionmap = []
-            for(const ek of allextractions) {
-                
-                const refkey = Object.keys(extractions[ek]['reference']).indexOf('ID') > -1 ? extractions[ek]['reference']['ID'] : extractions[ek]['reference']
-                const reference = await Reference.findOne({refkey: refkey})
-
-                var extraction = await Extraction.findOne({extid: ek})
-                if(extraction == null) {
-                    extraction = parseExtraction(ek, extractions[ek], reference)
-                }
-
-                exmap = await RefMap.findOne({
-                    reference: reference._id,
-                    extraction: extraction._id
-                });
-                if(exmap == null) {
-                    exmap = new RefMap({
-                        reference: reference._id,
-                        extraction: extraction._id
-                    });
-                    await exmap.save();
-                }
-                extractionmap.push(exmap._id);
-            }
-
+            // if the version does not yet exist in the database, add it 
+            console.log('Version v' + vcode['ontology'] + '.' + vcode['taxonomy'] + '.' + vcode['content'] + ' does not yet exist in the database.');
             v = Version({
                 ontology: version['version']['ontology'],
                 taxonomy: version['version']['taxonomy'],
                 content: version['version']['content'],
-                timestamp: version['timestamp'],
-                references: reflist,
-                map: extractionmap
+                timestamp: version['timestamp']
             });
+
+            // ensure that all references are stored in the database
+            const allrefkeys = Object.keys(version['extraction']['current']);
+            const references = await storeReferences(allrefkeys, extractions, v._id);
+
+            const structures = await jsonp.parseFilesToMap('structure/o' + vcode['ontology'] + '/t' + vcode['taxonomy']);
+            const extractionmap = await createExtractionMap(extractions, references, v._id, contributors, structures);
+
+            v.reference = references.map(r => r._id);
+            v.map = extractionmap.map(m => m._id);
+            
             await v.save();
         }
     }
 }
 
-getExtractionWhichSpecifiesReference = function(extractions, refkey) {
-    for(const extraction of Object.values(extractions)) {
-        if(Object.keys(extraction['reference']).indexOf('ID') > -1) {
-            if(extraction['reference']['ID'] == refkey) {
-                return extraction['reference']
+storeReferences = async function(refkeys, extractions, versionid) {
+    var references = [];
+
+    for(const refkey of refkeys) {
+        // check if the reference already exists
+        var reference = await Reference.findOne({refkey: refkey});
+
+        if(reference == null) {
+            console.log('Reference ' + refkey + ' does not yet exit');
+
+            // find the extraction which defines this reference
+            var refinfo = null;
+            const definingExtractions = Object.keys(extractions).filter(exkey => exkey.startsWith(refkey));
+            if(definingExtractions.length == 1) {
+                refinfo = extractions[definingExtractions[0]].reference;
+            } else {
+                // Todo add handling in case of more than one extraction referencing the same publication
+                console.error('Multiple extractions for the same reference found.')
+            }
+            
+            // store the reference
+            reference = new Reference({
+                refkey: refinfo['ID'],
+                citation: refinfo['Refstring'],
+                versions: [versionid]
+            });
+            await reference.save();
+        } else {
+            if(!(versionid in reference.versions)) {
+                await Reference.findOneAndUpdate(
+                    { refkey: refkey },
+                    { $push : { versions: versionid } }
+                );
             }
         }
+
+        references.push(reference);
     }
-    return null
+
+    return references;
 }
 
-parseExtraction = async function(extid, extraction, reference) {
-    const contributor = await Contributor.findOne({acronym: extraction['extractor']})
+createExtractionMap = async function(extractions, references, versionid, contributors, structures) {
+    var extractionmap = [];
 
-    // check all descriptions
-    descriptionKeys = []
-    factorKeys = []
-    if(Object.keys(extraction).indexOf('descriptions') > -1) {
-        for(const desc of extraction['descriptions']) {
-            var description = await Description.findOne({id: desc['id']});
+    for(const [extractionid, extractiondata] of Object.entries(extractions)) {
+        // get the key of the reference to which this extraction refers
+        const refkey = Object.keys(extractiondata['reference']).indexOf('ID') > -1 ? extractiondata['reference']['ID'] : extractiondata['reference']
+        const reference = await Reference.findOne({refkey: refkey});
 
-            if(description == null) {
-                console.log('Description [' + desc['id'] + '] is not included in the database yet.')
-                description = new Description({
-                    id: desc['id'],
-                    reference: reference._id,
-                    definition: desc['definition'],
-                    impact: desc['impact'],
-                    empiricalevidence: desc['empirical evidence'],
-                    pracitionersinvolved: desc['practitioners involved']
-                });
-                await description.save();
+        const extraction = await storeExtraction(extractionid, extractiondata, reference._id, versionid, contributors, structures);
 
-                // check if the quality attribute of the description is already contained in the database
-                var factor = await Factor.findOne({id: desc['qf id']});
-                if(factor == null) {
-                    // obtain the quality factor that is explained by the description (match the ID of the factor to the QA-ID of the description)
-                    const qf = extraction['quality factors'].filter(f => f['id']==desc['qf id'])[0]
-                    console.log('Quality Factor ' + qf['name'] + ' [' + qf['id'] + '] is not included in the database yet.')
-
-                    factor = new Factor({
-                        id: qf['id'],
-                        name: qf['name'],
-                        reference: [reference._id],
-                        linguisticcomplexity: qf['linguistic complexity'].toLowerCase(),
-                        scope: qf['scope']
-                    });
-                    await factor.save();
-                }
-                await Factor.findOneAndUpdate(
-                    { _id: factor._id },
-                    { $push: { descriptions: description._id } }
-                )
-
-                factorKeys.push(factor._id)
-            }
-            descriptionKeys.push(description._id)
+        var refmap = await RefMap.findOne({reference: reference._id, extraction: extraction._id});
+        if(refmap == null) {
+            refmap = new RefMap({
+                reference: reference._id,
+                extraction: extraction._id
+            });
+            await refmap.save();
         }
+        extractionmap.push(refmap);
     }
 
-    var datasetKeys = []
-    if(Object.keys(extraction).indexOf('data sets') > -1) {
-        for(const ds of extraction['data sets']) {
-            var dataset = await Dataset.findOne({id: ds['id']});
+    return extractionmap;
+}
 
-            if(dataset == null) {
-                console.log('Dataset [' + ds['id'] + '] is not included in the database yet.')
-                embedded = await getIDsOfEmbedded(ds['embedded information'])
+storeExtraction = async function(extractionid, extractiondata, referenceid, versionid, contributors, structures) {
+    // check if the extraction already exists
+    var extraction = await Extraction.findOne({extid: extractionid});
 
-                granularity = ds['granularity']
-                if(granularity.slice(-1) == 's') {
-                    granularity = granularity.slice(0, -1)
-                }
-                
-                dataset = new Dataset({
-                    id: ds['id'],
-                    reference: reference._id,
-                    embedded: embedded,
-                    description: ds['description'],
-                    origin: ds['origin'],
-                    groundtruthannotators: ds['ground truth annotators'],
-                    size: ds['size'],
-                    granularity: granularity,
-                    accessibility: ds['accessibility'],
-                    sourcelink: ds['source link']
-                });
-                await dataset.save();
-            }
-            datasetKeys.push(dataset._id);
+    if(extraction == null) {
+        const factors = await generatefactors(extractiondata['quality factors'], versionid, referenceid, structures.factor);
+        const descriptions = await generatedescriptions(extractiondata['descriptions'], versionid, referenceid);
+        const datasets = await generatedatasets(extractiondata['data sets'], versionid, referenceid);
+        const approaches = await generateapproaches(extractiondata['approaches'], versionid, referenceid, structures.approach);
+
+        extraction = Extraction({
+            extid: extractionid,
+            extractor: contributors.find(c => c.acronym == extractiondata.extractor)._id,
+            versions: [versionid],
+
+            factors: factors.map(f => f._id),
+            descriptions: descriptions.map(d => d._id),
+            datasets: datasets.map(d => d._id),
+            approaches: approaches.map(a => a._id)
+        });
+        await extraction.save();
+    } else {
+        if(!(versionid in extraction.versions)) {
+            await Extraction.findOneAndUpdate(
+                { extid: extractionid },
+                { $push : { versions: versionid } }
+            );
         }
     }
-
-    var approachKeys = []
-    if(Object.keys(extraction).indexOf('approaches') > -1) {
-        for(const ap of extraction['approaches']) {
-            var approach = await Approach.findOne({id: ap['id']});
-
-            if(approach == null) {
-                console.log('Approach [' + ap['id'] + '] is not included in the database yet.')
-                const embedded = await getIDsOfEmbedded(ap['descriptions'])
-                
-                var structure = {
-                    id: ap['id'],
-                    reference: reference._id,
-                    detecting: embedded, 
-                    description: ap['name'],
-                    acronym: ap['acronym'],
-                    type: ap['type'],
-                    accessibility: ap['accessibility'],
-                    empiricalmethod: ap['empirical method applied'],
-                    pracitionersinvolved: ap['practitioners involved'],
-                    sourcelink: ap['source link'],
-                    necessaryinformation: ap['necessary information']
-                }
-
-                if(Object.keys(ap).indexOf('release') > -1) {
-                    for(const release of ap['release']) {
-                        const code = release.toLowerCase().replace(' ', '');
-                        structure[code] = true;
-                    }
-                }
-                
-                approach = new Approach(structure);
-                await approach.save();
-            }
-            approachKeys.push(approach._id);
-        }
-    }
-
-    var extraction = new Extraction({
-        extid: extid,
-        extractor: contributor._id,
-        factors: factorKeys,
-        descriptions: descriptionKeys,
-        datasets: datasetKeys
-    });
-    
-    await extraction.save()
     return extraction;
+}
+
+generatefactors = async function(factorsdata, versionid, referenceid, structure) {
+    var factors = [];
+
+    // extract the dimension clusters
+    const aspects = structure.attributes.find(a => a.name == 'aspect').dimensions.map(d => d.dimension)
+
+    for(const factordata of factorsdata) {
+        // check if the factor already exists
+        var factor = await Factor.findOne({id: factordata.id});
+
+        if(factor == null) {
+            // put scope into singular
+            const scope = factordata['scope'].slice(-1) == 's' ? factordata['scope'].slice(0, -1) : factordata['scope']
+
+            // create a new factor object
+            factor = Factor({
+                id: factordata.id,
+                versions: [versionid],
+                reference: [],
+                name: factordata.name,
+                descriptions: [],
+                linguisticcomplexity: factordata['linguistic complexity'].toLowerCase(),
+                scope: scope.toLowerCase()
+            });
+            // record every aspect on which the factor has an impact on
+            for(const aspect of aspects) {
+                if(Object.keys(factordata).includes(aspect)) {
+                    factor[aspect] = factordata[aspect];
+                }
+            }
+            await factor.save();
+        } else {
+            // add the versionid to the existing factor object
+            if(!(versionid in factor.versions)) {
+                await Factor.findOneAndUpdate(
+                    { id: factordata.id },
+                    { $push : { versions: versionid } }
+                );
+            }
+        }
+
+        factors.push(factor);
+    }
+
+    return factors;
+}
+
+generatedescriptions = async function(descriptionsdata, versionid, referenceid) {
+    var descriptions = []
+
+    for(const descriptiondata of descriptionsdata) {
+        var description = await Description.findOne({id: descriptiondata.id});
+        const factor = await Factor.findOne({id: descriptiondata['qf id']})
+
+        if(description == null) {
+            description = Description({
+                id: descriptiondata.id,
+                versions: [versionid],
+                factor: factor._id,
+                reference: referenceid,
+                definition: descriptiondata.definition,
+                impact: descriptiondata.impact,
+                empiricalevidence: descriptiondata['empirical evidence'],
+                practitionersinvolved: descriptiondata['practitioners involved']
+            });
+            await description.save();
+        } else {
+            // add the versionid to the existing factor object
+            if(!(versionid in description.versions)) {
+                await Description.findOneAndUpdate(
+                    { id: descriptiondata.id },
+                    { $push : { versions: versionid } }
+                );
+            }
+        }
+
+        // update the factor
+        await Factor.findOneAndUpdate(
+            { _id: factor._id }, 
+            { $push: { 
+                descriptions: description._id,
+                reference: referenceid
+            } }
+        );
+
+        descriptions.push(description);
+    }
+
+    return descriptions;
+}
+
+generatedatasets = async function(datasetsdata, versionid, referenceid) {
+    var datasets = []
+
+    for(const dsdata of datasetsdata) {
+        var dataset = await Dataset.findOne({id: dsdata.id});
+
+        if(dataset == null) {
+            // obtain the correct references to the embedded descriptions
+            const embedded = await getIDsOfEmbedded(dsdata['embedded information']);
+
+            dataset = Dataset({
+                id: dsdata.id,
+                versions: [versionid],
+                reference: referenceid, 
+                embedded: embedded,
+                description: dsdata.description,
+                origin: dsdata.origin.toLowerCase(),
+                groundtruthannotators: dsdata['ground truth annotators'].toLowerCase(),
+                size: dsdata.size,
+                granularity: dsdata.granularity.toLowerCase(),
+                accessibility: dsdata.accessibility.toLowerCase(),
+                sourcelink: dsdata['source link']
+            });
+            await dataset.save();
+        } else {
+            // add the versionid to the existing factor object
+            if(!(versionid in dataset.versions)) {
+                await Dataset.findOneAndUpdate(
+                    { id: dsdata.id },
+                    { $push : { versions: versionid } }
+                );
+            }
+        }
+
+        datasets.push(dataset);
+    }
+
+    return datasets;
+}
+
+generateapproaches = async function(approachesdata, versionid, referenceid, structure) {
+    var approaches = []
+    
+    // extract the dimension clusters
+    const releases = structure.attributes.find(a => a.name == 'releases').dimensions.map(d => d.dimension)
+    const tools = structure.attributes.find(a => a.name == 'necessary information').dimensions.map(d => d.dimension)
+
+    for(const approachdata of approachesdata) {
+        var approach = await Approach.findOne({id: approachdata.id});
+
+        if(approach == null) {
+            // obtain the correct references to the embedded descriptions
+            const detecting = await getIDsOfEmbedded(approachdata['descriptions']);
+
+            approach = Approach({
+                id: approachdata.id,
+                versions: [versionid],
+                reference: referenceid,
+                detecting: detecting,
+
+                description: approachdata.name,
+                acronym: '',
+
+                type: approachdata.type.toLowerCase(),
+                accessibility: approachdata.accessibility.toLowerCase(),
+                sourcelink: approachdata['source link'],
+                empiricalevidence: approachdata['empirical evidence'],
+                practitionersinvolved: approachdata['practitioners involved']
+            });
+            // record every aspect on which the factor has an impact on
+            for(const release of releases) {
+                if(Object.keys(approachdata).includes(release)) {
+                    approach[release] = true;
+                }
+            }
+            var necessaryinformation = []
+            for(const tool of tools) {
+                if(Object.keys(approachdata).includes(tool)) {
+                    necessaryinformation.push(approach[tool]);
+                }
+            }
+            approach.necessaryinformation = necessaryinformation;
+            await approach.save();
+        } else {
+            // add the versionid to the existing factor object
+            if(!(versionid in approach.versions)) {
+                await Approach.findOneAndUpdate(
+                    { id: approachdata.id },
+                    { $push : { versions: versionid } }
+                );
+            }
+        }
+
+        approaches.push(approach);
+    }
+
+    return approaches;
 }
 
 getIDsOfEmbedded = async function(descIDs) {
     var result = [];
     for(const did of descIDs) {
-        const description = await Description.findOne({id: did})
-        result.push(description._id);
+        const description = await Description.findOne({id: did});
+        if(description != null) {
+            result.push(description._id);
+        } else {
+            console.error('Could not find embedded description ' + did);
+        }
     }
     return result;
 }

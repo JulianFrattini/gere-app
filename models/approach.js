@@ -6,28 +6,36 @@ const schema = new mongoose.Schema({
         required: true,
         unique: true,
     },
+
+    versions: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Version'
+    }],
     reference: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Reference'
     },
+
     detecting: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Description'
     }],
+
     description: {
         type: String
     },
     acronym: {
         type: String
     },
+
     type: {
         type: String,
-        enum: ["Rule-based", "Supervised ML", "Unsupervised ML", "Supervised DL", "Unsupervised DL"],
+        enum: ["rule-based", "supervised ml", "unsupervised ml", "supervised dl", "unsupervised dl"],
         required: true
     },
     accessibility: {
         type: String,
-        enum: ["Open Access Link", "Open Access", "Open Source", "Reachable Link", "Broken Link", "No Link", "Upon Request", "Private", "Proprietary"],
+        enum: ["open access link", "open access", "open source", "reachable link", "broken link", "no link", "upon request", "private", "proprietary"],
         required: true
     },
     sourcelink: {
@@ -43,6 +51,7 @@ const schema = new mongoose.Schema({
         default: false,
         required: true
     },
+    
     tool: {
         type: Boolean,
         required: true,

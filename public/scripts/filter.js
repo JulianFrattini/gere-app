@@ -53,7 +53,7 @@ window.onload = function() {
         }
     }
 
-    // initially: hida all expandable objects
+    // initially: hide all expandable objects
     for(const expandable of document.getElementsByClassName('expandable')) {
         expandable.style.display = 'none'
     }

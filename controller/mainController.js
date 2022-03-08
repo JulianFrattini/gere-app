@@ -8,8 +8,10 @@ const Factor = require('../models/factor')
 const Dataset = require('../models/dataset')
 const Approach = require('../models/approach')
 
-let factors_structure = JSON.parse(fs.readFileSync('./data/raw/structure/ontology-1/taxonomy-0/quality-factor.json'))
-let datasets = JSON.parse(fs.readFileSync('./data/raw/structure/ontology-1/taxonomy-0/dataset.json'))
+
+const basepath = './data/raw/'
+const factors_structure = JSON.parse(fs.readFileSync(basepath+'structure/o1/t0/factor.json'))
+const datasets = JSON.parse(fs.readFileSync(basepath+'structure/o1/t0/dataset.json'))
 
 
 exports.getLandingPage = async(req, res, next) => {
@@ -103,7 +105,7 @@ exports.getFactors = async(req, res, next) => {
         res.render('main/factors', {
             factors: factors, 
             linguisticcomplexity: factors_structure['attributes'].find(a => a['name'] == 'linguistic complexity')['characteristics'].map(c => c['value']),
-            scope: factors_structure['attributes'].find(a => a['name'] == 'Scope')['characteristics'].map(c => c['value']),
+            scope: factors_structure['attributes'].find(a => a['name'] == 'scope')['characteristics'].map(c => c['value']),
             aspects: factors_structure['attributes'].find(a => a['name'] == 'aspect')['dimensions'].map(d => d['dimension']),
             aspects_char: factors_structure['attributes'].find(a => a['name'] == 'aspect')['characteristics'].map(c => c['value']),
 

@@ -2,12 +2,16 @@ const fs = require('fs')
 const path = require('path')
 const clone = require('git-clone')
 
-const datapath = '../data/raw'
+const datapath = './data/raw'
 
 module.exports = {
 
     clone: async function() {
         try {
+            if(!fs.existsSync(datapath)) {
+              fs.mkdirSync(datapath)
+            }
+
             // delete all files in the current folder
             fs.readdir(datapath, (err, files) => {
                 if (err) throw err;

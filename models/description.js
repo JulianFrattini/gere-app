@@ -6,10 +6,28 @@ const schema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    versions: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Version'
+    }],
     reference: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Reference'
     },
+    factor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Factor'
+    },
+    
+    embedded: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Dataset'
+    }],
+    detected: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Approach'
+    }],
+
     definition: {
         type: String,
         required: true
@@ -17,6 +35,7 @@ const schema = new mongoose.Schema({
     impact: {
         type: String
     }, 
+
     empiricalevidence: {
         type: Boolean,
         default: false
