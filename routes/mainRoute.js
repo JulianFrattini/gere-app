@@ -13,6 +13,10 @@ router.get('/factors/:rid', function(req, res, next) {
     req.session.rid = req.params.rid;
     res.redirect('/factors')
 });
+router.get('/factors/description/:did', function(req, res, next) {
+    req.session.rid = req.params.did;
+    res.redirect('/factors')
+});
 router.get('/factors', mainController.getFactors);
 
 // data sets
@@ -22,7 +26,12 @@ router.get('/datasets/:rid', function(req, res, next) {
 });
 router.get('/datasets', mainController.getDatasets);
 
-router.get('/approaches/:rid', mainController.getApproachesOfReference);
+// approaches
+router.get('/approaches/:rid', function(req, res, next) {
+    req.session.rid = req.params.rid;
+    res.redirect('/approaches')
+});
+router.get('/approaches', mainController.getApproaches);
 
 
 module.exports = router

@@ -12,6 +12,7 @@ const Approach = require('../models/approach')
 const basepath = './data/raw/'
 const factors_structure = JSON.parse(fs.readFileSync(basepath+'structure/o1/t0/factor.json'))
 const datasets = JSON.parse(fs.readFileSync(basepath+'structure/o1/t0/dataset.json'))
+const approach_structure = JSON.parse(fs.readFileSync(basepath+'structure/o1/t0/approach.json'))
 
 
 exports.getLandingPage = async(req, res, next) => {
@@ -49,7 +50,7 @@ exports.getReferences = async(req, res, next) => {
         
         // dinf the version object and populate it with all included references
         const version = await Version.findById(vid)
-            .populate({path: 'references', model: 'Reference'})
+            .populate({path: 'references', model: 'Reference'});
 
         res.render('main/references', {
             references: version['references']
@@ -81,12 +82,23 @@ exports.getDatasets = async(req, res, next) => {
     }
 }
 
-exports.getApproachesOfReference = async(req, res, next) => {
+exports.getApproaches= async(req, res, next) => {
     try {
-        const approaches = await Approach.find({reference: req.params.rid});
+        var refkeyfilter =  await getReferenceFilter(req);
+
+        const approaches = await Approach.find().sort({id: 1})
+            .populate({path: 'detecting', model: 'Description'})
+            .populate({path: 'reference', model: 'Reference'});
 
         res.render('main/approaches', {
-            approaches: approaches
+            approaches: approaches,
+            types: approach_structure['attributes'].find(a => a['name'] == 'type')['characteristics'].map(c => c['value']),
+            accessibility: approach_structure['attributes'].find(a => a['name'] == 'accessibility')['characteristics'].map(c => c['value']),
+
+            releases: approach_structure['attributes'].find(a => a['name'] == 'releases')['dimensions'].map(d => d['dimension']),
+            releases_char: approach_structure['attributes'].find(a => a['name'] == 'releases')['characteristics'].map(c => c['value']),
+
+            refkeyfilter: refkeyfilter
         });
     } catch(error) {
         next(error)
@@ -133,7 +145,6 @@ getVersion = async function(req) {
  */
 getReferenceFilter = async function(req) {
     if(req.session.rid) {
-        console.log(req.session.rid)
         const rid = await References.findById(mongoose.Types.ObjectId(req.session.rid));
         req.session.rid = null;
         return rid.refkey;

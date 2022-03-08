@@ -38,47 +38,46 @@ block content
                                     = sc
                 for aspect in aspects 
                     td.tcol_icon.ficon_default(title=`${aspect} (click to filter)` onclick=`cycleDimension('${aspect}', null, 'triple', this)`) 
-                        span
-                            if aspect == 'adequacy'
-                                i.fa-brands.fa-black-tie.ficon_default
-                            else if aspect == 'unambiguouseness'
-                                i.fa-solid.fa-hands-asl-interpreting.ficon_default
-                            else if aspect == 'atomicity'
-                                i.fa-solid.fa-atom.ficon_default
-                            else if aspect == 'completeness'
-                                i.fa-solid.fa-circle.ficon_default
-                            else if aspect == 'simplicity'
-                                i.fa-solid.fa-bezier-curve.ficon_default
-                            else if aspect == 'compliance'
-                                i.fa-solid.fa-section.ficon_default
-                            else if aspect == 'correctness'
-                                i.fa-solid.fa-circle-check.ficon_default
-                            else if aspect == 'consistency'
-                                i.fa-solid.fa-code-compare.ficon_default
-                            else if aspect == 'designindependence'
-                                i.fa-solid.fa-palette.ficon_default
-                            else if aspect == 'feasibility'
-                                i.fa-solid.fa-code-pull-request.ficon_default
-                            else if aspect == 'maintainability'
-                                i.fa-solid.fa-folder-open.ficon_default
-                            else if aspect == 'modifiability'
-                                i.fa-solid.fa-code-fork.ficon_default
-                            else if aspect == 'precision'
-                                i.fa-solid.fa-crosshairs.ficon_default
-                            else if aspect == 'necessity'
-                                i.fa-solid.fa-copy.ficon_default
-                            else if aspect == 'relevancy'
-                                i.fa-solid.fa-newspaper.ficon_default
-                            else if aspect == 'reusability'
-                                i.fa-solid.fa-recycle.ficon_default
-                            else if aspect == 'traceability'
-                                i.fa-solid.fa-paw.ficon_default
-                            else if aspect == 'understandability'
-                                i.fa-solid.fa-book-open.ficon_default
-                            else if aspect == 'verifiability'
-                                i.fa-solid.fa-clipboard-list.ficon_default
-                            else 
-                                i.fa-solid.fa-circle-dot.ficon_default
+                        if aspect == 'adequacy'
+                            i.fa-brands.fa-black-tie.ficon_default
+                        else if aspect == 'unambiguouseness'
+                            i.fa-solid.fa-hands-asl-interpreting.ficon_default
+                        else if aspect == 'atomicity'
+                            i.fa-solid.fa-atom.ficon_default
+                        else if aspect == 'completeness'
+                            i.fa-solid.fa-circle.ficon_default
+                        else if aspect == 'simplicity'
+                            i.fa-solid.fa-bezier-curve.ficon_default
+                        else if aspect == 'compliance'
+                            i.fa-solid.fa-section.ficon_default
+                        else if aspect == 'correctness'
+                            i.fa-solid.fa-circle-check.ficon_default
+                        else if aspect == 'consistency'
+                            i.fa-solid.fa-code-compare.ficon_default
+                        else if aspect == 'designindependence'
+                            i.fa-solid.fa-palette.ficon_default
+                        else if aspect == 'feasibility'
+                            i.fa-solid.fa-code-pull-request.ficon_default
+                        else if aspect == 'maintainability'
+                            i.fa-solid.fa-folder-open.ficon_default
+                        else if aspect == 'modifiability'
+                            i.fa-solid.fa-code-fork.ficon_default
+                        else if aspect == 'precision'
+                            i.fa-solid.fa-crosshairs.ficon_default
+                        else if aspect == 'necessity'
+                            i.fa-solid.fa-copy.ficon_default
+                        else if aspect == 'relevancy'
+                            i.fa-solid.fa-newspaper.ficon_default
+                        else if aspect == 'reusability'
+                            i.fa-solid.fa-recycle.ficon_default
+                        else if aspect == 'traceability'
+                            i.fa-solid.fa-paw.ficon_default
+                        else if aspect == 'understandability'
+                            i.fa-solid.fa-book-open.ficon_default
+                        else if aspect == 'verifiability'
+                            i.fa-solid.fa-clipboard-list.ficon_default
+                        else 
+                            i.fa-solid.fa-circle-dot.ficon_default
                 td.tcol_middle
                     .dimension.dropdown-check-list(tabindex="100")
                         span.label References 

@@ -1,18 +1,102 @@
 extends ../layout
 
+block append head
+    link(rel='stylesheet' href='/stylesheets/filterbox.css')
+    script(src='/scripts/toggleExpander.js')
+    script(src='/scripts/filter.js' subjects=`${JSON.stringify(approaches)}` cycles=[{id: 'tuple', values: {positive: true, negative: false}}])
+
 block content
     h2 Approaches
     table 
         thead 
             tr 
                 td.tcol_short Index 
-                td.tcol_icon Acro
-                td.tcol_span Description 
-                td.tcol_short Type
+                td.tcol_middle
+                    .dimension.dropdown-check-list(tabindex="100")
+                        span.label Detecting 
+                        ul.characteristics
+                            li 
+                                input.reflistfilter(type='text' oninput=`filterReflist('detecting', 'id', this.value)` placeholder='Type to filter' value=detectingfilter)
+                td.tcol_short Acro
+                td.tcol_wide
+                    .dimension.dropdown-check-list
+                        span.label Description
+                        ul.characteristics
+                            li 
+                                input(type='text' oninput=`filterScopenote('description', this.value)` placeholder='Type to filter')
+                td.tcol_middle
+                    .dimension.dropdown-check-list(tabindex="100")
+                        span.label Type 
+                        ul.characteristics 
+                            for t in types
+                                li 
+                                    input(type='checkbox' checked=true onclick=`filterDimension('type', '${t}', this.checked);`)
+                                    = t
+                for release of releases 
+                    td.tcol_icon.ficon_default(title=`${release} (click to filter)` onclick=`cycleDimension('${release}', null, 'tuple', this)`) 
+                        if release == 'tool'
+                            i.fa-solid.fa-hammer.ficon_default
+                        else if release == 'webservice'
+                            i.fa-brands.fa-html5.ficon_default
+                        else if release == 'library'
+                            i.fa-solid.fa-book.ficon_default
+                        else if release == 'api'
+                            i.fa-solid.fa-puzzle-piece.ficon_default
+                        else if release == 'code'
+                            i.fa-solid.fa-code.ficon_default
+                        else if release == 'notebook'
+                            i.fa-brands.fa-python.ficon_default
+                        else if release == 'model'
+                            i.fa-solid.fa-gear.ficon_default
+
+                td.tcol_middle
+                    .dimension.dropdown-check-list(tabindex="100")
+                        span.label Accessibility 
+                        ul.characteristics 
+                            for acc in accessibility
+                                li 
+                                    input(type='checkbox' checked=true onclick=`filterDimension('accessibility', '${acc}', this.checked);`)
+                                    = acc
+                td.tcol_icon(title='Links to available tools')
+                    i.fa-solid.fa-screwdriver-wrench
+
+                td.tcol_middle
+                    .dimension.dropdown-check-list(tabindex="100")
+                        span.label References 
+                        ul.characteristics
+                            li 
+                                input.reflistfilter(type='text' oninput=`filterReflist('reference', 'refkey', this.value)` placeholder='Type to filter' value=refkeyfilter)
+
+                td.tcol_icon.ficon_default(title='Empirical Evidence (click to filter)' onclick=`cycleDimension('empiricalmethod', null, 'tuple', this)`) 
+                    i.fa-solid.fa-receipt.ficon_default
+                td.tcol_icon.ficon_default(title='Practitioners Involved (click to filter)' onclick=`cycleDimension('practitionersinvolved', null, 'tuple', this)`) 
+                    i.fa-solid.fa-user.ficon_default
+
         tbody
             for ap in approaches 
-                tr
+                tr(id= ap.id)
                     td= ap.id
+                    td #{ap.detecting.map(d => d.id).join(', ')}
                     td= ap.acronym
                     td= ap.description 
                     td= ap.type
+                    for release of releases 
+                        if ap[release]
+                            td.tc_good(title=`${release} has been disclosed`)
+                        else 
+                            td.tc_unknown(title=`${release} has not been disclosed`)
+                    td= ap.accessibility 
+                    td 
+                        if ap.sourcelink 
+                            a(href=ap.sourcelink  target='blank') 
+                                i.fa-solid.fa-screwdriver-wrench
+                    td= ap.reference.refkey
+                    if ap.empiricalmethod
+                        td.tc_good(title='An empirical method has been applied to validate the approach.')
+                    else
+                        td.tc_bad(title='The approach has simply been postulated without any empirical validation.') 
+
+                    if ap.practitionersinvolved
+                        td.tc_good(title='The evaluation of the approach involved practitioners, which primarily work in industry.')
+                    else
+                        td.tc_bad(title='The evaluation of the approach involved no practitioners (hence instead: authors, research staff, students, etc.).')

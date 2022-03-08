@@ -24,8 +24,11 @@ block content
                     td= ref.refkey 
                     td= ref.citation
                     td 
-                        a(href=`/factors/${ref._id}`) QFs
+                        if ref.factors.length > 0
+                            a(href=`/factors/${ref._id}`)= `${ref.factors.length} QFs`
                     td 
-                        a(href=`/datasets/${ref._id}`) DSs
+                        if ref.datasets.length > 0
+                            a(href=`/datasets/${ref._id}`)= `${ref.datasets.length} DSs`
                     td 
-                        a(href=`/approaches/${ref._id}`) APs
+                        if ref.approaches.length > 0
+                            a(href=`/approaches/${ref._id}`)= `${ref.approaches.length} APs`

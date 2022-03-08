@@ -75,7 +75,7 @@ updateVersions = async function(versions, extractions, contributors) {
             const structures = await jsonp.parseFilesToMap('structure/o' + vcode['ontology'] + '/t' + vcode['taxonomy']);
             const extractionmap = await createExtractionMap(extractions, references, v._id, contributors, structures);
 
-            v.reference = references.map(r => r._id);
+            v.references = references.map(r => r._id);
             v.map = extractionmap.map(m => m._id);
             
             await v.save();
@@ -222,6 +222,12 @@ generatefactors = async function(factorsdata, versionid, referenceid, structure)
             }
         }
 
+        // update the reference
+        await Reference.findOneAndUpdate(
+            { _id: referenceid },
+            { $push: { factors: factor._id } }
+        )
+
         factors.push(factor);
     }
 
@@ -266,6 +272,13 @@ generatedescriptions = async function(descriptionsdata, versionid, referenceid) 
             } }
         );
 
+        // update the reference
+        await Reference.findOneAndUpdate(
+            { _id: referenceid },
+            { $push: { descriptions: description._id } }
+        )
+
+
         descriptions.push(description);
     }
 
@@ -306,6 +319,13 @@ generatedatasets = async function(datasetsdata, versionid, referenceid) {
             }
         }
 
+        // update the reference
+        await Reference.findOneAndUpdate(
+            { _id: referenceid },
+            { $push: { datasets: dataset._id } }
+        )
+
+
         datasets.push(dataset);
     }
 
@@ -338,7 +358,7 @@ generateapproaches = async function(approachesdata, versionid, referenceid, stru
                 type: approachdata.type.toLowerCase(),
                 accessibility: approachdata.accessibility.toLowerCase(),
                 sourcelink: approachdata['source link'],
-                empiricalevidence: approachdata['empirical evidence'],
+                empiricalmethod: approachdata['empirical method applied'],
                 practitionersinvolved: approachdata['practitioners involved']
             });
             // record every aspect on which the factor has an impact on
@@ -364,6 +384,13 @@ generateapproaches = async function(approachesdata, versionid, referenceid, stru
                 );
             }
         }
+
+        // update the reference
+        await Reference.findOneAndUpdate(
+            { _id: referenceid },
+            { $push: { approaches: approach._id } }
+        )
+
 
         approaches.push(approach);
     }
