@@ -7,6 +7,7 @@ block append head
 
 block content
     h2 Factors
+    p= desc
     if reference
         p= reference.citation
 
@@ -93,16 +94,16 @@ block content
             for factor in factors 
                 tr.trow_clickable(id= factor.id onclick=`toggleExpander('${factor.id}D')`)
                     td= factor.id
-                    td= factor.name 
+                    td.bold= factor.name 
                     td= factor.linguisticcomplexity
                     td= factor.scope
                     for aspect in aspects 
                         if factor[aspect] == '?'
-                            td.tc_unknown(title=`unknown impact on ${aspect}`) 
+                            td.tcol_icon.tc_unknown(title=`unknown impact on ${aspect}`) 
                         else if factor[aspect] == '-'
-                            td.tc_bad(title=`negative impact on ${aspect}`) -
+                            td.tcol_icon.tc_bad(title=`negative impact on ${aspect}`) -
                         else if factor[aspect] == '+'
-                            td.tc_good(title=`positive impact on ${aspect}`) +
+                            td.tcol_icon.tc_good(title=`positive impact on ${aspect}`) +
                         else
                             td.tc_obsolete
                     td #{factor.reference.map(r => r.refkey).join(', ')}

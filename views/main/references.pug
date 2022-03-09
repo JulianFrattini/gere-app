@@ -2,9 +2,13 @@ extends ../layout
 
 block append head
     link(rel='stylesheet' href='/stylesheets/filterbox.css')
+    script(src='/scripts/toggleExpander.js')
     script(src='/scripts/filter.js' subjects=`${JSON.stringify(references)}` id='refkey')
 
 block content
+    h2 References 
+    p This list contains references to all primary studies that have been included in the current version of the requirements quality factor ontology.
+
     table 
         thead 
             tr 
@@ -15,20 +19,23 @@ block content
                         ul.characteristics
                             li 
                                 input(type='text' oninput=`filterScopenote('citation', this.value)` placeholder='Type to filter')
-                td.tcol_short QFs
-                td.tcol_short DSs
-                td.tcol_short APs
+                td.tcol_icon(title='Factors and Descriptions')
+                    a(href='/factors')
+                        i.fa-solid.fa-circle
+                td.tcol_icon(title='Data sets')
+                    a(href='/datasets')
+                        i.fa-solid.fa-database
+                td.tcol_icon(title='Approaches')
+                    a(href='/approaches')
+                        i.fa-solid.fa-screwdriver-wrench
         tbody
             for ref in references 
                 tr(id= ref.refkey)
                     td= ref.refkey 
                     td= ref.citation
-                    td 
-                        if ref.factors.length > 0
-                            a(href=`/factors/${ref._id}`)= `${ref.factors.length} QFs`
-                    td 
-                        if ref.datasets.length > 0
-                            a(href=`/datasets/${ref._id}`)= `${ref.datasets.length} DSs`
-                    td 
-                        if ref.approaches.length > 0
-                            a(href=`/approaches/${ref._id}`)= `${ref.approaches.length} APs`
+                    for taxonomy of ['factors', 'datasets', 'approaches']
+                        if ref[taxonomy].length > 0
+                            td.tcol_icon(title=`See the ${ref[taxonomy].length} eligible ${taxonomy} of this primary study`)
+                                a(href=`/${taxonomy}/${ref._id}`)= ref[taxonomy].length
+                        else 
+                            td.tcol_icon(title=`This primary study contained no eligible ${taxonomy}`)

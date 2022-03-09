@@ -18,7 +18,15 @@ block content
                             li 
                                 input.reflistfilter(type='text' oninput=`filterReflist('embedded', 'id', this.value)` placeholder='Type to filter' value=embeddedfilter)
                 td.tcol_wide Description 
-                td.tcol_short Content
+                td.tcol_icon(title='Number of entries in this data set') n
+                td.tcol_middle
+                    .dimension.dropdown-check-list(tabindex="100")
+                        span.label Granularity 
+                        ul.characteristics 
+                            for g in granularity
+                                li 
+                                    input(type='checkbox' checked=true onclick=`filterDimension('granularity', '${g}', this.checked);`)
+                                    = g
                 td.tcol_middle
                     .dimension.dropdown-check-list(tabindex="100")
                         span.label Origin 
@@ -56,15 +64,21 @@ block content
             for ds in datasets 
                 tr(id= ds.id)
                     td= ds.id
-                    if ds.groundtruthannotators != "None"
+                    if ds.groundtruthannotators != "none"
                         td #{ds.embedded.map(e => e.id).join(', ')}
                     else 
                         td
                     td= ds.description 
-                    td= `${ds.size} ${ds.granularity}s`
+                    td= ds.size
+                    td= ds.granularity
                     td= ds.origin
                     td= ds.groundtruthannotators
-                    td= ds.accessibility
+                    if ['open access link', 'available in paper', 'reachable link'].includes(ds.accessibility)
+                        td.tc_good= ds.accessibility
+                    else if ds.accessibility == 'broken link'
+                        td.tc_okay= ds.accessibility
+                    else
+                        td.tc_bad= ds.accessibility
                     td(title=ds.reference.citation) 
                         a(href=`/factors/${ds.reference._id}`)= ds.reference.refkey
                     td

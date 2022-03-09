@@ -65,15 +65,19 @@ updateVersions = async function(versions, extractions, contributors) {
                 ontology: version['version']['ontology'],
                 taxonomy: version['version']['taxonomy'],
                 content: version['version']['content'],
+                description: version['description'],
                 timestamp: version['timestamp']
             });
+            
+            const relevantextractionkeys = Object.values(version.extraction.current);
+            const relevantextractions = Object.fromEntries(Object.entries(extractions).filter(([key]) => relevantextractionkeys.includes(key)))
 
             // ensure that all references are stored in the database
             const allrefkeys = Object.keys(version['extraction']['current']);
-            const references = await storeReferences(allrefkeys, extractions, v._id);
+            const references = await storeReferences(allrefkeys, relevantextractions, v._id);
 
             const structures = await jsonp.parseFilesToMap('structure/o' + vcode['ontology'] + '/t' + vcode['taxonomy']);
-            const extractionmap = await createExtractionMap(extractions, references, v._id, contributors, structures);
+            const extractionmap = await createExtractionMap(relevantextractions, references, v._id, contributors, structures);
 
             v.references = references.map(r => r._id);
             v.map = extractionmap.map(m => m._id);
@@ -171,6 +175,16 @@ storeExtraction = async function(extractionid, extractiondata, referenceid, vers
         });
         await extraction.save();
     } else {
+        const taxonomies = {'quality factors': Factor, 'descriptions': Description, 'data sets': Dataset, 'approaches': Approach}
+        for(const tax of Object.keys(taxonomies)) {
+            for(const object of extractiondata[tax]) {
+                await taxonomies[tax].findOneAndUpdate(
+                    { id : object.id },
+                    { $push: {versions: versionid }
+                });
+            }
+        }
+
         if(!(versionid in extraction.versions)) {
             await Extraction.findOneAndUpdate(
                 { extid: extractionid },

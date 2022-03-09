@@ -13,6 +13,9 @@ const schema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    description: {
+        type: String
+    },
     timestamp: {
         type: Date,
         default: Date.now

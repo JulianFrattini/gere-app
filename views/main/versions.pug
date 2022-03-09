@@ -5,12 +5,34 @@ block content
         thead 
             tr 
                 td.tcol_short Version 
-                td.tcol_span References 
-                td.tcol_short Link
+                td.tcol_span Description
+                td.tcol_icon(title='number of references')
+                    i.fa-solid.fa-file-lines
+                td.tcol_middle Timestamp
+                for tax of taxonomies
+                    td.tcol_icon(title=`number of ${tax}`) 
+                        if tax == 'factors'
+                            i.fa-solid.fa-circle
+                        else if tax == 'descriptions'
+                            i.fa-solid.fa-pen-nib
+                        else if tax == 'datasets'
+                            i.fa-solid.fa-database
+                        else if tax == 'approaches'
+                            i.fa-solid.fa-screwdriver-wrench
+                        else
+                            i.fa-solid.fa-circle
+                td.tcol_middle(title='Select a version to visualize in the tool') Checkout
         tbody
             for v in versions 
                 tr
                     td= `v${v.ontology}.${v.taxonomy}.${v.content}`
+                    td= v.description
                     td= v.references
-                    td 
-                        a(href=`/references/${v.id}`) See
+                    td= v.timestamp
+                    for tax of taxonomies
+                        td.tcol_icon= v.count[tax]
+                    if String(currentvid) == String(v.id)
+                        td (current)
+                    else
+                        td(title=`use version v${v.ontology}.${v.taxonomy}.${v.content}`)
+                            a(href=`/versions/checkout/${v.id}`) Checkout

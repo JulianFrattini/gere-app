@@ -21,23 +21,57 @@ exports.getLandingPage = async(req, res, next) => {
 
 exports.getAllVersions = async(req, res, next) => {
     try {
-        const versions = await Version.find().sort({timestamp: -1});
+        const currentVersion = await getVersion(req); 
+
+        const versions = await Version.find().sort({timestamp: 1})
+            .populate({path: 'map', populate: {
+                path: 'extraction', model: 'Extraction'
+            }});
 
         var overview = []
+        const taxonomies = ['factors', 'descriptions', 'datasets', 'approaches']
         for(const version of versions) {
+            var count = {}
+            taxonomies.forEach(tax => count[tax] = 0)
+            for(const map of version.map) {
+                taxonomies.forEach(tax => count[tax] += map.extraction[tax].length);
+            }
+
             overview.push({
                 id: version._id,
                 ontology: version['ontology'],
                 taxonomy: version['taxonomy'],
                 content: version['content'],
-                timestamp: version['timestamp'],
-                references: version['references'].length
+                description: version['description'],
+                timestamp: version['timestamp'].toDateString(),
+                references: version['references'].length,
+                count: count
             });
         }
 
         res.render('main/versions', {
-            versions: overview
+            versions: overview,
+            currentvid: currentVersion._id,
+            taxonomies: taxonomies
         });
+    } catch(error) {
+        next(error)
+    }
+}
+
+exports.setVersion = async(req, res, next) => {
+    try {
+        // obtain the version object to which the tool aught to be set
+        const version = await Version.findById(req.params.vid);
+        
+        // set the session version to this new version
+        if(version != null) {
+            req.session.version = version;
+        } else {
+            console.error('No version found with key ' + req.params.vid);
+        }
+
+        res.redirect('/versions')
     } catch(error) {
         next(error)
     }
@@ -46,14 +80,37 @@ exports.getAllVersions = async(req, res, next) => {
 exports.getReferences = async(req, res, next) => {
     try {
         // obtain the current version to be displayed
-        const vid = await getVersion(req);
+        const currentversion = await getVersion(req);
         
-        // dinf the version object and populate it with all included references
-        const version = await Version.findById(vid)
-            .populate({path: 'references', model: 'Reference'});
+        // get all references that are associated to the current version
+        const references = await References.find({versions: currentversion._id});
 
         res.render('main/references', {
-            references: version['references']
+            references: references
+        });
+    } catch(error) {
+        next(error)
+    }
+}
+
+exports.getFactors = async(req, res, next) => {
+    try {
+        const currentversion = await getVersion(req); 
+        var refkeyfilter =  await getReferenceFilter(req);
+
+        const factors = await Factor.find({versions: currentversion._id}).sort({'id': 1})
+            .populate({path: 'descriptions', model: 'Description'})
+            .populate({path: 'reference', model: 'Reference'});
+
+        res.render('main/factors', {
+            factors: factors, 
+            desc: factors_structure['description'],
+            linguisticcomplexity: factors_structure['attributes'].find(a => a['name'] == 'linguistic complexity')['characteristics'].map(c => c['value']),
+            scope: factors_structure['attributes'].find(a => a['name'] == 'scope')['characteristics'].map(c => c['value']),
+            aspects: factors_structure['attributes'].find(a => a['name'] == 'aspect')['dimensions'].map(d => d['dimension']),
+            aspects_char: factors_structure['attributes'].find(a => a['name'] == 'aspect')['characteristics'].map(c => c['value']),
+
+            refkeyfilter: refkeyfilter
         });
     } catch(error) {
         next(error)
@@ -62,10 +119,10 @@ exports.getReferences = async(req, res, next) => {
 
 exports.getDatasets = async(req, res, next) => {
     try {
-        //const version = await getVersion(req); 
+        const currentversion = await getVersion(req); 
         var refkeyfilter =  await getReferenceFilter(req);
 
-        const dataset = await Dataset.find()
+        const dataset = await Dataset.find({versions: currentversion._id})
             .populate({path: 'embedded', model: 'Description'})
             .populate({path: 'reference', model: 'Reference'});
 
@@ -74,6 +131,7 @@ exports.getDatasets = async(req, res, next) => {
             origin: datasets['attributes'].find(a => a['name'] == 'origin')['characteristics'].map(c => c['value']),
             groundtruthannotators: datasets['attributes'].find(a => a['name'] == 'ground truth annotators')['characteristics'].map(c => c['value']),
             accessibility: datasets['attributes'].find(a => a['name'] == 'accessibility')['characteristics'].map(c => c['value']),
+            granularity: datasets['attributes'].find(a => a['name'] == 'granularity')['characteristics'].map(c => c['value']),
 
             refkeyfilter: refkeyfilter
         });
@@ -84,9 +142,10 @@ exports.getDatasets = async(req, res, next) => {
 
 exports.getApproaches= async(req, res, next) => {
     try {
+        const currentversion = await getVersion(req); 
         var refkeyfilter =  await getReferenceFilter(req);
 
-        const approaches = await Approach.find().sort({id: 1})
+        const approaches = await Approach.find({versions: currentversion._id}).sort({id: 1})
             .populate({path: 'detecting', model: 'Description'})
             .populate({path: 'reference', model: 'Reference'});
 
@@ -105,29 +164,6 @@ exports.getApproaches= async(req, res, next) => {
     }
 }
 
-exports.getFactors = async(req, res, next) => {
-    try {
-        //const version = await getVersion(req); 
-        var refkeyfilter =  await getReferenceFilter(req);
-
-        const factors = await Factor.find().sort({'id': 1})
-            .populate({path: 'descriptions', model: 'Description'})
-            .populate({path: 'reference', model: 'Reference'});
-
-        res.render('main/factors', {
-            factors: factors, 
-            linguisticcomplexity: factors_structure['attributes'].find(a => a['name'] == 'linguistic complexity')['characteristics'].map(c => c['value']),
-            scope: factors_structure['attributes'].find(a => a['name'] == 'scope')['characteristics'].map(c => c['value']),
-            aspects: factors_structure['attributes'].find(a => a['name'] == 'aspect')['dimensions'].map(d => d['dimension']),
-            aspects_char: factors_structure['attributes'].find(a => a['name'] == 'aspect')['characteristics'].map(c => c['value']),
-
-            refkeyfilter: refkeyfilter
-        });
-    } catch(error) {
-        next(error)
-    }
-}
-
 
 /**
  * Obtain the current version of which data is to be displayed
@@ -135,7 +171,7 @@ exports.getFactors = async(req, res, next) => {
 getVersion = async function(req) {
     if(!req.session.version) {
         const currentVersion = await Version.find().sort({timestamp: -1});
-        req.session.version = currentVersion[0]._id;
+        req.session.version = currentVersion[0];
     } 
     return req.session.version;
 }
