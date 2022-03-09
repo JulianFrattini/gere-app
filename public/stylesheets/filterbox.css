@@ -38,14 +38,18 @@
     border-top: none;
 }
 
-.dropdown-check-list ul.characteristics li {
-    list-style: none;
-}
-
-.dropdown-check-list.visible .label {
+/*.dropdown-check-list.visible .label {
     color: #0094ff;
-}
+}*/
 
 .dropdown-check-list.visible .characteristics {
     display: block;
+    position: absolute;
+    background-color: #ddd;
+    padding: 5px 20px 5px 5px;
+}
+
+.dropdown-check-list ul.characteristics li {
+    list-style: none;
+    padding: 0px 5px;
 }

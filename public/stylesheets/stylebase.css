@@ -3,7 +3,6 @@ html {
     background: #f7f7f7;
 }
 
-
 body {
     font-size: 14px;
     font-family: 'Barlow', sans-serif;
@@ -43,7 +42,33 @@ nav li {
     padding-right: 10px;
 }
 
+/* RECURRING ELEMENTS */
+a {
+    text-decoration: none;
+    color: #100e79;
+}
+
+a:hover {
+    color: #1b18cc;
+}
+
+.highlightable:hover {
+    box-shadow: 0 0 15px 5px rgba(105, 105, 105, 0.6);
+    transition: 0.3s;
+}
+
+.bold {
+    font-weight: bold;
+}
+
 /* MEDIA QUERIES */
+@media (min-width: 800px) {
+    body {
+      max-width: 1200px;
+      text-align: left;
+    }
+  }
+
 @media (max-width: 800px) {
     .smallscreen {
         display: inherit;

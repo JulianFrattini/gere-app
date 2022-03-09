@@ -10,6 +10,7 @@ html
 
       link(rel='stylesheet' href='/stylesheets/stylebase.css')
       link(rel='stylesheet' href='/stylesheets/table.css')
+      link(rel='stylesheet' href='/stylesheets/dropdown.css')
 
 
   body
@@ -22,12 +23,21 @@ html
       .headline
         nav
           ul
-            li
-              a(href='/factors') Factors
-            li
-              a(href='/datasets') Data Sets
+            li.dropdown 
+              button.dropbtn Taxonomies 
+                i.fa-solid.fa-caret-down
+              .dropdown-content 
+                a(href='/factors') 
+                  i.fa-solid.fa-circle
+                  | Factors + Descriptions
+                a(href='/datasets') 
+                  i.fa-solid.fa-database
+                  | Data Sets 
+                a(href='/approaches') 
+                  i.fa-solid.fa-screwdriver-wrench
+                  | Approaches
             li
               a(href='/references') References
             li
-              a(href='/versions') Home
+              a(href='/versions') Versions
     block content
