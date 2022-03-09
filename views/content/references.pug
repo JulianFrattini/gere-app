@@ -20,13 +20,13 @@ block content
                             li 
                                 input(type='text' oninput=`filterScopenote('citation', this.value)` placeholder='Type to filter')
                 td.tcol_icon(title='Factors and Descriptions')
-                    a(href='/factors')
+                    a(href='/content/factors')
                         i.fa-solid.fa-circle
                 td.tcol_icon(title='Data sets')
-                    a(href='/datasets')
+                    a(href='/content/datasets')
                         i.fa-solid.fa-database
                 td.tcol_icon(title='Approaches')
-                    a(href='/approaches')
+                    a(href='/content/approaches')
                         i.fa-solid.fa-screwdriver-wrench
         tbody
             for ref in references 
@@ -36,6 +36,6 @@ block content
                     for taxonomy of ['factors', 'datasets', 'approaches']
                         if ref[taxonomy].length > 0
                             td.tcol_icon(title=`See the ${ref[taxonomy].length} eligible ${taxonomy} of this primary study`)
-                                a(href=`/${taxonomy}/${ref._id}`)= ref[taxonomy].length
+                                a(href=`/content/${taxonomy}/${ref._id}`)= ref[taxonomy].length
                         else 
                             td.tcol_icon(title=`This primary study contained no eligible ${taxonomy}`)

@@ -7,6 +7,8 @@ block append head
 
 block content
     h2 Approaches
+    p= structure.description
+
     table 
         thead 
             tr 
@@ -28,11 +30,11 @@ block content
                     .dimension.dropdown-check-list(tabindex="100")
                         span.label Type 
                         ul.characteristics 
-                            for t in types
+                            for t in structure.lists['type']
                                 li 
                                     input(type='checkbox' checked=true onclick=`filterDimension('type', '${t}', this.checked);`)
                                     = t
-                for release of releases 
+                for release of structure.lists['releases-dimensions'] 
                     td.tcol_icon.ficon_default(title=`${release} (click to filter)` onclick=`cycleDimension('${release}', null, 'tuple', this)`) 
                         if release == 'tool'
                             i.fa-solid.fa-hammer.ficon_default
@@ -53,7 +55,7 @@ block content
                     .dimension.dropdown-check-list(tabindex="100")
                         span.label Accessibility 
                         ul.characteristics 
-                            for acc in accessibility
+                            for acc in structure.lists['accessibility']
                                 li 
                                     input(type='checkbox' checked=true onclick=`filterDimension('accessibility', '${acc}', this.checked);`)
                                     = acc
@@ -65,7 +67,7 @@ block content
                         span.label References 
                         ul.characteristics
                             li 
-                                input.reflistfilter(type='text' oninput=`filterReflist('reference', 'refkey', this.value)` placeholder='Type to filter' value=refkeyfilter)
+                                input.reflistfilter(type='text' oninput=`filterReflist('reference', 'refkey', this.value)` placeholder='Type to filter' value=referencefilter.refkey)
 
                 td.tcol_icon.ficon_default(title='Empirical Evidence (click to filter)' onclick=`cycleDimension('empiricalmethod', null, 'tuple', this)`) 
                     i.fa-solid.fa-receipt.ficon_default
@@ -80,7 +82,7 @@ block content
                     td= ap.acronym
                     td= ap.description 
                     td= ap.type
-                    for release of releases 
+                    for release of structure.lists['releases-dimensions'] 
                         if ap[release]
                             td.tc_good(title=`${release} has been disclosed`)
                         else 
@@ -90,7 +92,8 @@ block content
                         if ap.sourcelink 
                             a(href=ap.sourcelink  target='blank') 
                                 i.fa-solid.fa-screwdriver-wrench
-                    td= ap.reference.refkey
+                    td(title=ap.reference.citation) 
+                        a(href=`/content/factors/${ap.reference._id}`)= ap.reference.refkey
                     if ap.empiricalmethod
                         td.tc_good(title='An empirical method has been applied to validate the approach.')
                     else

@@ -3,13 +3,11 @@ extends ../layout
 block append head
     link(rel='stylesheet' href='/stylesheets/filterbox.css')
     script(src='/scripts/toggleExpander.js')
-    script(src='/scripts/filter.js' subjects=`${JSON.stringify(factors)}` cycles=[{id: 'triple', values: {positive: aspects_char[1], negative: aspects_char[0], unknown: aspects_char[2]}}, {id: 'tuple', values: {positive: true, negative: false}}])
+    script(src='/scripts/filter.js' subjects=`${JSON.stringify(factors)}` cycles=[{id: 'triple', values: {positive: structure.lists['aspect-characteristics'][1], negative: structure.lists['aspect-characteristics'][0], unknown: structure.lists['aspect-characteristics'][2]}}, {id: 'tuple', values: {positive: true, negative: false}}])
 
 block content
     h2 Factors
-    p= desc
-    if reference
-        p= reference.citation
+    p= structure.description
 
     table 
         thead 
@@ -25,7 +23,7 @@ block content
                     .dimension.dropdown-check-list(tabindex="100")
                         span.label Complexity 
                         ul.characteristics 
-                            for lc in linguisticcomplexity
+                            for lc in structure.lists['linguistic complexity']
                                 li 
                                     input(type='checkbox' checked=true onclick=`filterDimension('linguisticcomplexity', '${lc}', this.checked);`)
                                     = lc
@@ -33,11 +31,11 @@ block content
                     .dimension.dropdown-check-list(tabindex="100")
                         span.label Scope 
                         ul.characteristics 
-                            for sc in scope
+                            for sc in structure.lists['scope']
                                 li 
                                     input(type='checkbox' checked=true onclick=`filterDimension('scope', '${sc}', this.checked);`)
                                     = sc
-                for aspect in aspects 
+                for aspect in structure.lists['aspect-dimensions'] 
                     td.tcol_icon.ficon_default(title=`${aspect} (click to filter)` onclick=`cycleDimension('${aspect}', null, 'triple', this)`) 
                         if aspect == 'adequacy'
                             i.fa-brands.fa-black-tie.ficon_default
@@ -84,7 +82,7 @@ block content
                         span.label References 
                         ul.characteristics
                             li 
-                                input.reflistfilter(type='text' oninput=`filterReflist('reference', 'refkey', this.value)` placeholder='Type to filter' value=refkeyfilter)
+                                input.reflistfilter(type='text' oninput=`filterReflist('reference', 'refkey', this.value)` placeholder='Type to filter' value=referencefilter.refkey)
                 td.tcol_icon.ficon_default(title='Empirical Evidence (click to filter)' onclick=`cycleDimension('descriptions', 'empiricalevidence', 'tuple', this)`) 
                     i.fa-solid.fa-receipt.ficon_default
                 td.tcol_icon.ficon_default(title='Practitioners Involved (click to filter)' onclick=`cycleDimension('descriptions', 'practitionersinvolved', 'tuple', this)`) 
@@ -97,7 +95,7 @@ block content
                     td.bold= factor.name 
                     td= factor.linguisticcomplexity
                     td= factor.scope
-                    for aspect in aspects 
+                    for aspect in structure.lists['aspect-dimensions'] 
                         if factor[aspect] == '?'
                             td.tcol_icon.tc_unknown(title=`unknown impact on ${aspect}`) 
                         else if factor[aspect] == '-'
@@ -119,7 +117,7 @@ block content
                 tr.trow_midline.expandable(class= `${factor.id}D`)
                     td ID
                     td(colspan=3) Definition(s)
-                    td(colspan=aspects.length) Impact
+                    td(colspan=structure.lists['aspect-dimensions'].length) Impact
                     td Reference
                     td 
                     td 
@@ -127,7 +125,7 @@ block content
                     tr.expandable.trow_minor(class= `${factor.id}D`)
                         td= description.id
                         td(colspan=3)= description.definition
-                        td(colspan=aspects.length)= description.impact
+                        td(colspan=structure.lists['aspect-dimensions'].length)= description.impact
 
                         - var ref = factor.reference.find(r => String(r._id) == String(description.reference))
                         td(title=ref.citation)= ref.refkey

@@ -24,20 +24,30 @@ html
         nav
           ul
             li.dropdown 
-              button.dropbtn Taxonomies 
+              button.dropbtn Content 
                 i.fa-solid.fa-caret-down
               .dropdown-content 
-                a(href='/factors') 
+                a(href='/content/factors') 
                   i.fa-solid.fa-circle
                   | Factors + Descriptions
-                a(href='/datasets') 
+                a(href='/content/datasets') 
                   i.fa-solid.fa-database
                   | Data Sets 
-                a(href='/approaches') 
+                a(href='/content/approaches') 
                   i.fa-solid.fa-screwdriver-wrench
                   | Approaches
-            li
-              a(href='/references') References
-            li
-              a(href='/versions') Versions
+                a(href='/content/references') 
+                  i.fa-solid.fa-file-lines
+                  | References
+            li.dropdown 
+              button.dropbtn Structure 
+                i.fa-solid.fa-caret-down
+              .dropdown-content 
+                a(href='/structure/guideline' title='Guideline for extracting objects for the ontology') 
+                  i.fa-solid.fa-vial
+                  | Extraction Guideline
+                a(href='/structure/versions' title='Available versions of the requirements quality factor ontology')
+                  i.fa-solid.fa-code-merge
+                  | Versions 
+
     block content

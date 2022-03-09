@@ -1,4 +1,3 @@
-const fs = require('fs')
 const jsonp = require('./jsonparser.js')
 
 const Contributor = require('../models/contributor')

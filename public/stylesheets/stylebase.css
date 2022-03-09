@@ -61,6 +61,15 @@ a:hover {
     font-weight: bold;
 }
 
+.capitalized {
+    text-transform: capitalize;
+}
+
+.subscript {
+    font-size: 0.9em;
+    font-style: italic;
+}
+
 /* MEDIA QUERIES */
 @media (min-width: 800px) {
     body {

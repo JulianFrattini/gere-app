@@ -7,6 +7,8 @@ block append head
 
 block content
     h2 Data Sets
+    p= structure.description
+
     table 
         thead 
             tr 
@@ -23,7 +25,7 @@ block content
                     .dimension.dropdown-check-list(tabindex="100")
                         span.label Granularity 
                         ul.characteristics 
-                            for g in granularity
+                            for g in structure.lists['granularity']
                                 li 
                                     input(type='checkbox' checked=true onclick=`filterDimension('granularity', '${g}', this.checked);`)
                                     = g
@@ -31,7 +33,7 @@ block content
                     .dimension.dropdown-check-list(tabindex="100")
                         span.label Origin 
                         ul.characteristics 
-                            for og in origin
+                            for og in structure.lists['origin']
                                 li 
                                     input(type='checkbox' checked=true onclick=`filterDimension('origin', '${og}', this.checked);`)
                                     = og
@@ -39,7 +41,7 @@ block content
                     .dimension.dropdown-check-list(tabindex="100")
                         span.label Ground-truth annotators 
                         ul.characteristics 
-                            for gta in groundtruthannotators
+                            for gta in structure.lists['ground truth annotators']
                                 li 
                                     input(type='checkbox' checked=true onclick=`filterDimension('groundtruthannotators', '${gta}', this.checked);`)
                                     = gta
@@ -47,7 +49,7 @@ block content
                     .dimension.dropdown-check-list(tabindex="100")
                         span.label Accessibility 
                         ul.characteristics 
-                            for acc in accessibility
+                            for acc in structure.lists['accessibility']
                                 li 
                                     input(type='checkbox' checked=true onclick=`filterDimension('accessibility', '${acc}', this.checked);`)
                                     = acc
@@ -56,7 +58,7 @@ block content
                         span.label References 
                         ul.characteristics
                             li 
-                                input.reflistfilter(type='text' oninput=`filterReflist('reference', 'refkey', this.value)` placeholder='Type to filter' value=refkeyfilter)
+                                input.reflistfilter(type='text' oninput=`filterReflist('reference', 'refkey', this.value)` placeholder='Type to filter' value=referencefilter.refkey)
                 td.tcol_icon 
                     i.fa-solid.fa-database
 
@@ -80,7 +82,7 @@ block content
                     else
                         td.tc_bad= ds.accessibility
                     td(title=ds.reference.citation) 
-                        a(href=`/factors/${ds.reference._id}`)= ds.reference.refkey
+                        a(href=`/content/factors/${ds.reference._id}`)= ds.reference.refkey
                     td
                         if ds.sourcelink
                             if ds.accessibility == "Available in Paper"

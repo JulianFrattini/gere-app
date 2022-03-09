@@ -1,6 +1,8 @@
 extends ../layout
 
 block content
+    h2 Versions
+
     table 
         thead 
             tr 
@@ -35,4 +37,4 @@ block content
                         td (current)
                     else
                         td(title=`use version v${v.ontology}.${v.taxonomy}.${v.content}`)
-                            a(href=`/versions/checkout/${v.id}`) Checkout
+                            a(href=`/structure/versions/checkout/${v.id}`) Checkout

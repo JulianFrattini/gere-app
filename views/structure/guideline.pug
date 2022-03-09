@@ -1,0 +1,68 @@
+extends ../layout
+
+block content
+    h1 Guideline 
+    p The following sections describe how to identify and extract eligible objects from primary studies. Mandatory attributes are marked with an asterisk.
+
+    hr
+    for taxonomy of Object.keys(structure)
+        h2.capitalized= taxonomy
+        p= structure[taxonomy].description
+
+        for attribute of structure[taxonomy].attributes
+            if attribute.description
+                h3.capitalized= attribute.name
+                p.subscript
+                    span.capitalized= attribute.type
+                    if attribute.mandatory 
+                        | *
+                p= attribute.description
+
+                if attribute.type == 'dimension'
+                    if attribute['extraction rule']
+                        p 
+                            span.bold Extraction rule: 
+                            = `${attribute['extraction rule']}`
+                    table 
+                        thead 
+                            tr 
+                                td Characteristic 
+                                td Extraction Rule 
+                        tbody 
+                            for characteristic of attribute.characteristics 
+                                tr 
+                                    td.bold= characteristic.value 
+                                    td= characteristic.description
+                else if attribute.type == 'dimension cluster'
+                    if attribute['extraction rule']
+                        p 
+                            span.bold Extraction rule: 
+                            = `${attribute['extraction rule']}`
+                    table 
+                        thead 
+                            tr 
+                                td Dimensions
+                                td Extraction Rule 
+                        tbody 
+                            for dimension of attribute.dimensions 
+                                tr 
+                                    td.bold= dimension.dimension 
+                                    td= dimension.description
+                    
+                    table 
+                        thead 
+                            tr 
+                                td Characteristics
+                                td Extraction Rule 
+                        tbody 
+                            for characteristic of attribute.characteristics 
+                                tr 
+                                    td.bold= characteristic.value 
+                                    td= characteristic.description
+                else if attribute.type == 'scope note'
+                    if attribute['rule']
+                        p 
+                            span.bold Extraction rule: 
+                            = `${attribute['rule']}`
+        hr
+                    

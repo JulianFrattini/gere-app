@@ -1,15 +1,11 @@
 const express = require('express')
 const router = express.Router()
 
-const mainController = require('../controller/mainController')
+const mainController = require('../controller/mainController');
 
 router.get('/', function(req, res, next) {
-    res.redirect('/factors')
+    res.redirect('/content/factors')
 });
-
-// versions
-router.get('/versions', mainController.getAllVersions);
-router.get('/versions/checkout/:vid', mainController.setVersion);
 
 // references
 router.get('/references', mainController.getReferences);
@@ -18,25 +14,25 @@ router.get('/references', mainController.getReferences);
 router.get('/factors', mainController.getFactors);
 router.get('/factors/:rid', function(req, res, next) {
     req.session.rid = req.params.rid;
-    res.redirect('/factors')
+    res.redirect('/content/factors')
 });
 router.get('/factors/description/:did', function(req, res, next) {
     req.session.rid = req.params.did;
-    res.redirect('/factors')
+    res.redirect('/content/factors')
 });
 
 // data sets
 router.get('/datasets', mainController.getDatasets);
 router.get('/datasets/:rid', function(req, res, next) {
     req.session.rid = req.params.rid;
-    res.redirect('/datasets')
+    res.redirect('/content/datasets')
 });
 
 // approaches
 router.get('/approaches', mainController.getApproaches);
 router.get('/approaches/:rid', function(req, res, next) {
     req.session.rid = req.params.rid;
-    res.redirect('/approaches')
+    res.redirect('/content/approaches')
 });
 
 
