@@ -15,7 +15,6 @@
     "express-session": "^1.17.2",
     "git-clone": "^0.2.0",
     "mongoose": "^6.2.1",
-    "node-fetch": "^2.6.7",
     "pug": "^3.0.2"
   }
 }

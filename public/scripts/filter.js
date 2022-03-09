@@ -79,9 +79,18 @@ function filter() {
                             break;
                         }
                     } else {
-                        if(subject[f.attribute].find(d => d[f.subdimension] == f.characteristic) == null) {
-                            violatesFilter = true;
-                            break;
+                        if(f.characteristic) {
+                            // if the filter is "true", filter for all subjects that have at least one reference where the subdimension value is true
+                            if(subject[f.attribute].find(d => d[f.subdimension] == f.characteristic) == null) {
+                                violatesFilter = true;
+                                break;
+                            }
+                        } else {
+                            // if the filter is false, filter for all subjects that have no reference where the subdimension is true
+                            if(subject[f.attribute].find(d => d[f.subdimension] == !f.characteristic) != null) {
+                                violatesFilter = true;
+                                break;
+                            }
                         }
                     }
                 } else if(f.type == 'contains') {
