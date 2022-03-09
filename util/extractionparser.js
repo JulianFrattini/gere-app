@@ -11,13 +11,14 @@ const Description = require('../models/description')
 const Dataset = require('../models/dataset')
 const Approach = require('../models/approach')
 
+// if a description for a factor gets parsed before the factor, then the factor must be added to this dict such that once that factor is created, the reference to the description can be created also
+var awaitingfactors = {}
+
 module.exports = {
     parseData: async function() {
         // obtain and update all contributors
         const contributorData = jsonp.readFile('contributors.json')
         const contributors = await updateContributors(contributorData);
-
-        // obtain all structure files
 
         // get all versions
         const allversions = await jsonp.parseFiles('versions');
@@ -157,9 +158,9 @@ storeExtraction = async function(extractionid, extractiondata, referenceid, vers
     var extraction = await Extraction.findOne({extid: extractionid});
 
     if(extraction == null) {
-        const factors = await generatefactors(extractiondata['quality factors'], versionid, referenceid, structures.factor);
+        const factors = await generatefactors(extractiondata['factors'], versionid, referenceid, structures.factor);
         const descriptions = await generatedescriptions(extractiondata['descriptions'], versionid, referenceid);
-        const datasets = await generatedatasets(extractiondata['data sets'], versionid, referenceid);
+        const datasets = await generatedatasets(extractiondata['datasets'], versionid, referenceid);
         const approaches = await generateapproaches(extractiondata['approaches'], versionid, referenceid, structures.approach);
 
         extraction = Extraction({
@@ -174,7 +175,7 @@ storeExtraction = async function(extractionid, extractiondata, referenceid, vers
         });
         await extraction.save();
     } else {
-        const taxonomies = {'quality factors': Factor, 'descriptions': Description, 'data sets': Dataset, 'approaches': Approach}
+        const taxonomies = {'factors': Factor, 'descriptions': Description, 'datasets': Dataset, 'approaches': Approach}
         for(const tax of Object.keys(taxonomies)) {
             for(const object of extractiondata[tax]) {
                 await taxonomies[tax].findOneAndUpdate(
@@ -198,7 +199,7 @@ generatefactors = async function(factorsdata, versionid, referenceid, structure)
     var factors = [];
 
     // extract the dimension clusters
-    const aspects = structure.attributes.find(a => a.name == 'aspect').dimensions.map(d => d.dimension)
+    const aspects = structure.attributes.find(a => a.name == 'aspect').dimensions.map(d => d.value);
 
     for(const factordata of factorsdata) {
         // check if the factor already exists
@@ -224,6 +225,17 @@ generatefactors = async function(factorsdata, versionid, referenceid, structure)
                     factor[aspect] = factordata[aspect];
                 }
             }
+
+            // if a description for this factor has already been created, record it now
+            if(Object.keys(awaitingfactors).includes(factordata.id)) {
+                factor.descriptions.push(awaitingfactors[factordata.id].description);
+                factor.reference.push(awaitingfactors[factordata.id].reference)
+                await Description.findOneAndUpdate(
+                    {_id: awaitingfactors[factordata.id].description},
+                    { factor: factor._id });
+                delete awaitingfactors[factordata.id];
+            }
+
             await factor.save();
         } else {
             // add the versionid to the existing factor object
@@ -258,13 +270,21 @@ generatedescriptions = async function(descriptionsdata, versionid, referenceid) 
             description = Description({
                 id: descriptiondata.id,
                 versions: [versionid],
-                factor: factor._id,
                 reference: referenceid,
                 definition: descriptiondata.definition,
                 impact: descriptiondata.impact,
                 empiricalevidence: descriptiondata['empirical evidence'],
                 practitionersinvolved: descriptiondata['practitioners involved']
             });
+            if(factor != null) {
+                description.factor = factor._id;
+            } else {
+                awaitingfactors[descriptiondata['qf id']] = {
+                    description: description._id,
+                    reference: referenceid
+                };
+            }
+
             await description.save();
         } else {
             // add the versionid to the existing factor object
@@ -276,14 +296,16 @@ generatedescriptions = async function(descriptionsdata, versionid, referenceid) 
             }
         }
 
-        // update the factor
-        await Factor.findOneAndUpdate(
-            { _id: factor._id }, 
-            { $push: { 
-                descriptions: description._id,
-                reference: referenceid
-            } }
-        );
+        // update the factor if it already exists
+        if(factor != null) {
+            await Factor.findOneAndUpdate(
+                { _id: factor._id }, 
+                { $push: { 
+                    descriptions: description._id,
+                    reference: referenceid
+                } }
+            );
+        }
 
         // update the reference
         await Reference.findOneAndUpdate(
@@ -307,6 +329,10 @@ generatedatasets = async function(datasetsdata, versionid, referenceid) {
         if(dataset == null) {
             // obtain the correct references to the embedded descriptions
             const embedded = await getIDsOfEmbedded(dsdata['embedded information']);
+            var granularity = dsdata.granularity.toLowerCase();
+            if(granularity.slice(-1) == 's') {
+                granularity = granularity.slice(0, -1)
+            }
 
             dataset = Dataset({
                 id: dsdata.id,
@@ -317,7 +343,7 @@ generatedatasets = async function(datasetsdata, versionid, referenceid) {
                 origin: dsdata.origin.toLowerCase(),
                 groundtruthannotators: dsdata['ground truth annotators'].toLowerCase(),
                 size: dsdata.size,
-                granularity: dsdata.granularity.toLowerCase(),
+                granularity: granularity,
                 accessibility: dsdata.accessibility.toLowerCase(),
                 sourcelink: dsdata['source link']
             });
@@ -349,8 +375,8 @@ generateapproaches = async function(approachesdata, versionid, referenceid, stru
     var approaches = []
     
     // extract the dimension clusters
-    const releases = structure.attributes.find(a => a.name == 'releases').dimensions.map(d => d.dimension)
-    const tools = structure.attributes.find(a => a.name == 'necessary information').dimensions.map(d => d.dimension)
+    const releases = structure.attributes.find(a => a.name == 'releases').dimensions.map(d => d.value)
+    const tools = structure.attributes.find(a => a.name == 'necessary information').dimensions.map(d => d.value)
 
     for(const approachdata of approachesdata) {
         var approach = await Approach.findOne({id: approachdata.id});

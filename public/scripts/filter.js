@@ -177,7 +177,7 @@ function cycleDimension(dimension, subdimension, cycleid, icon) {
             icon.style.color = nextstatus.color
             icon.title = `${dimension}` + nextstatus.tooltipaddendum + ' (click to filter)'
 
-            var f = filters.find(f => f.attribute == dimension);
+            var f = filters.find(f => f.attribute == dimension && f.subdimension == subdimension);
             if(f == undefined) {
                 if('value' in nextstatus) {
                     filters.push({
