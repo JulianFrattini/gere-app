@@ -9,8 +9,10 @@ module.exports = {
     clone: async function() {
         try {
             if(!fs.existsSync(datapath)) {
-              fs.mkdirSync(datapath)
-            }
+              fs.mkdirSync(datapath, {recursive: true});
+            } else {
+		    console.log(datapath + ' exists');
+		}
 
             // delete all files in the current folder
             fs.readdir(datapath, (err, files) => {
@@ -18,7 +20,10 @@ module.exports = {
               
                 for (const file of files) {
                   fs.unlink(path.join(datapath, file), err => {
-                    if (err) throw err;
+                    if (err) {
+			    console.log(err);
+			throw err;
+			}
                   });
                 }
               });
@@ -28,6 +33,7 @@ module.exports = {
 
             return 1
         } catch(error) {
+		console.log(error);
             return 0
         }
     }
