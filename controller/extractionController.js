@@ -1,4 +1,5 @@
 const extractionparser = require('../util/extractionparser')
+const datahandler = require('../util/datahandler')
 
 const Contributor = require('../models/contributor')
 
@@ -13,18 +14,5 @@ module.exports = {
         await extractionparser.parseData()
 
         res.json({'result': 'ok'})
-    },
-
-    getExtractions: async function(req, res, next) {
-        try {
-            var contributors = await Contributor.find();
-    
-            res.json({
-                contributors: contributors
-            })
-        } catch(error) {
-            console.log(error)
-            next(error)
-        }
     }
 }

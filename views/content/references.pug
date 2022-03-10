@@ -34,8 +34,9 @@ block content
                     td= ref.refkey 
                     td= ref.citation
                     for taxonomy of ['factors', 'datasets', 'approaches']
-                        if ref[taxonomy].length > 0
-                            td.tcol_icon(title=`See the ${ref[taxonomy].length} eligible ${taxonomy} of this primary study`)
-                                a(href=`/content/${taxonomy}/${ref._id}`)= ref[taxonomy].length
+                        - var n = taxonomy == 'factors' ? Math.max(ref['factors'].length, ref['descriptions'].length) : ref[taxonomy].length
+                        if n > 0
+                            td.tcol_icon(title=`See the ${n} eligible ${taxonomy} of this primary study`)
+                                a(href=`/content/${taxonomy}/${ref._id}`)= n
                         else 
                             td.tcol_icon(title=`This primary study contained no eligible ${taxonomy}`)
