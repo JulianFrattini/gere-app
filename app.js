@@ -12,7 +12,8 @@ const structureRoute = require('./routes/structureRoute')
 const extractionRouter = require('./routes/extractions')
 
 // setup connection to mongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/rqfo', { useNewUrlParser: true, useUnifiedTopology: true });
+mongodbpath = 'mongodb://' + ('MONGO_URL' in process.env ? process.env.MONGO_URL : '127.0.0.1') + ':27017/rqfo'
+mongoose.connect(mongodbpath, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.Promise = global.Promise;
 mongoose.connection.on('error', (error) => console.error(error.message));
 
