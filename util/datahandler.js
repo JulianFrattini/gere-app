@@ -9,7 +9,7 @@ module.exports = {
     clone: async function() {
         try {
             if(!fs.existsSync(datapath)) {
-              fs.mkdirSync(datapath)
+              fs.mkdirSync(datapath, {recursive: true})
             }
 
             // delete all files in the current folder
