@@ -24,7 +24,7 @@ module.exports = {
               });
 
             // clone the public repository containing all of the requirements quality factor extractions
-            clone('https://github.com/JulianFrattini/requirements-quality-factors', datapath)
+            clone('https://github.com/JulianFrattini/gere-structure-content', datapath)
 
             return 1
         } catch(error) {
