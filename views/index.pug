@@ -1,9 +1,47 @@
 extends layout
 
 block content
-    h2 Welcome
-    ul 
-        li 
-            a(href='/versions') Versions
-        li 
-            a(href='/factors') Factors
+    h2 About
+    p The requirements quality factor ontology is a joint initiative from the requirements quality research community to make the concept of quality factors visible, accessible, and usable. A quality factor is a normative metric which maps a textual requirement of a specific granularity to a scale which informs about the quality of this input. Factors can be evaluated on textual input without any human intervention, which makes them perfect tools for early and integrateable requirements quality assurance.
+
+
+    h2 Published Material
+    p Browse through previous publications (
+        span 
+            i.fa.fa-file(title="Paper")
+        | ), associated artifacts (
+        span
+            i.fa.fa-database(title="Dataset")
+        | ), and an accessible demos (
+        span 
+            i.fa.fa-gamepad(title="Demo")
+        | ) where applicable.
+
+    table.t_span
+        thead
+          td.tcol_icon #
+          td Publication
+          td.tcol_icon 
+            i.fa.fa-file(title="Paper")
+          td.tcol_icon
+            i.fab.fa-github(title="Artifact")
+          td.tcol_icon
+            i.fa.fa-gamepad(title="Demo")
+        - var id = 1
+        each pub, index in publications
+            tr
+                td.tcol_icon= `[${index+1}]`
+                td= pub.citation
+                td.tcol_icon 
+                    if pub.paper
+                        a(href= pub.paper target="_blank")
+                            i.fa.fa-file(title="Paper")
+                td.tcol_icon
+                    if pub.artifact
+                        a(href= pub.artifact target="_blank")
+                            i.fa.fa-database(title="Repository")
+                td.tcol_icon
+                    if pub.demo
+                        a(href= pub.demo target="_blank")
+                            i.fa.fa-gamepad(title="Demo")
+            - id = id+1
