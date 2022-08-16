@@ -70,6 +70,14 @@ a:hover {
     font-style: italic;
 }
 
+.centering {
+    text-align: center;
+}
+
+.scaled {
+    width: 80%;
+}
+
 /* MEDIA QUERIES */
 @media (min-width: 800px) {
     body {

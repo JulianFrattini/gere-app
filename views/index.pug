@@ -2,11 +2,16 @@ extends layout
 
 block append head
     link(rel='stylesheet' href='/stylesheets/landing.css')
+    script(src='/scripts/ontologyVisualizer.js' ontology={'taxonomies': [{'name': 'Factor', 'attributes': ['name', 'linguistic complexity']}]})
 
 block content
     h2 About
     p The requirements quality factor ontology is a joint initiative from the requirements quality research community to make the concept of quality factors visible, accessible, and usable. A quality factor is a normative metric which maps a textual requirement of a specific granularity to a scale which informs about the quality of this input. Factors can be evaluated on textual input without any human intervention, which makes them perfect tools for early and integrateable requirements quality assurance.
 
+    h2 Ontology 
+    .centering
+        a(href='/content/factors')
+            img.highlightable.scaled(src='images/structure/rqfo_v1-0-0.png')
 
     h2 Published Material
     p Browse through previous publications (
