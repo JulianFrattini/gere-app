@@ -1,0 +1,25 @@
+{
+    "extractor": "ex2",
+    "reference": {
+        "ID": "R023",
+        "Refstring": "Wilmink, M., & Bockisch, C. (2017, February). On the ability of lightweight checks to detect ambiguity in requirements documentation. In International Working Conference on Requirements Engineering: Foundation for Software Quality (pp. 327-343). Springer, Cham."
+    },
+    "timestamp": "2022-02-24 10:00:00",
+    "factors": [
+        {
+            "id": "QF086",
+            "name": "Syntactic",
+            "linguistic complexity": "Syntactic",
+            "scope": "Phrase"
+        },
+        {
+            "id": "QF088",
+            "name": "Pragmatic",
+            "linguistic complexity": "Semantic",
+            "scope": "Sentence"
+        }
+    ],
+    "descriptions": [],
+    "datasets": [],
+    "approaches": []
+}
