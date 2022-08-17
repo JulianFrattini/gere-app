@@ -23,7 +23,7 @@
         "id": "lmo",
         "name": "Lloyd Montgomery",
         "role": "Main Contributor",
-        "desc": "Lloyd Montgomery is a PhD student at the University of Hamburg, Germany, under the supervision of Waleed Malej. His research interests revolve around recommender systems, requirements quality, and natural language processing for requirements engineering.",
+        "desc": "Lloyd Montgomery is a PhD student at the University of Hamburg, Germany, under the supervision of Walid Maalej. His research interests revolve around recommender systems, requirements quality, and natural language processing for requirements engineering.",
         "links": [
             {
                 "type": "home",
@@ -47,7 +47,7 @@
         "id": "jfb",
         "name": "Jannik Fischbach",
         "role": "Main Contributor",
-        "desc": "Jannik works as a software consultant at Netlight Consulting and started his PhD studies at the University of Cologne in 2019. His research focuses on modern Natural Language Processing techniques and their potential to support stakeholders in agile testing process. He has already published at several top venues (e.g. ICST, ESEM) and won the Best Industry Paper Award at ESEM in 2020 and Best Paper Award at REFSQ in 2021.",
+        "desc": "Jannik works as a consultant at Netlight and as a Post-doctoral researcher at fortiss. His research focuses on modern Natural Language Processing techniques and their potential to support stakeholders in the software engineering process. He has already published at several top venues (e.g. ICST, ESEM) and won the Best Industry Paper Award at ESEM'20 and Best Research Paper Award at REFSQ'21.",
         "links": [
             {
                 "type": "scholar",
@@ -107,7 +107,7 @@
         "id": "dfu",
         "name": "Davide Fucci",
         "role": "Supervisor",
-        "desc": "tbd",
+        "desc": "Davide Fucci is an assistant professor (senior lecturer) at the Blekinge Institute of Technology. His research interest focus on various aspects of software and requirements engineering, such as data-driven requirements engineering, developers' affect, behaviors, and cognition, as well as agile testing (including security testing).",
         "links": [
             {
                 "type": "home",

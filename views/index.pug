@@ -7,11 +7,17 @@ block append head
 block content
     h2 About
     p The requirements quality factor ontology is a joint initiative from the requirements quality research community to make the concept of quality factors visible, accessible, and usable. A quality factor is a normative metric which maps a textual requirement of a specific granularity to a scale which informs about the quality of this input. Factors can be evaluated on textual input without any human intervention, which makes them perfect tools for early and integrateable requirements quality assurance.
+    
+    .btn_container
+        a.btn.btn_fill(href="#communityeffort") Join the collaborative Community Effort
 
     h2 Ontology 
+    p The following diagram represents the current structure of the ontology. Click the diagram (or the button below) or select a specific taxonomy in the dropdown meny under "Content" to access the content of the ontology.
     .centering
         a(href='/content/factors')
             img.highlightable.scaled(src='images/structure/rqfo_v1-0-0.png')
+    .btn_container
+        a.btn.btn_fill(href="/content/factors") Access the Ontology Content
 
     h2 Published Material
     p Browse through previous publications (
@@ -78,12 +84,10 @@ block content
                                     i.linkitem.fa-brands.fa-orcid(title="ORCID Profile")
                                 default
                                     i.linkitem.fa.fa-code
-        .member.element 
-            img.profile.highlightable(src='images/members/blank.png')
-            h3 Join the Team 
-            .role (in any role, with any amount of contribution)
-            p If you are interested in requirements quality and specifically the notion of quality factors, consider contributing to the ontology. We aim at enhancing and maintaining the ontology in order to provide (1) a structure guiding reporting new quality factors and (2) a repository containing existing factors, data sets, and approaches for visibility and easy reuse. In the first step, we need your help to identify relevant publications containing quality factors and related elements. If you are interested, 
-                span 
-                    a(href="mailto:julian.frattini@bth.se?subject=Requirements Quality Factor Ontology") click here to contact us.
-            a(href="mailto:julian.frattini@bth.se?subject=Requirements Quality Factor Ontology")
-                i.linkitem.fa-solid.fa-envelope(title="Contact the team")
+    
+    h2#communityeffort Community Effort
+    p The requirements quality factor ontology is far from complete: on the one hand, improving the structure of the ontology requires including as many perspectives of the requirements quality research community as possible, and on the other hand, identifying all relevant publications which contain eligible objects (factors, data sets, and approaches) for the content of the ontology is an extensive endeavor. Hence, we extend an invitation to a joint community effort.
+    p If you are interested in requirements quality and specifically the notion of quality factors, consider contributing to the ontology. We aim at enhancing and maintaining the ontology in order to provide (1) a structure guiding reporting new quality factors and (2) a repository containing existing factors, data sets, and approaches for visibility and easy reuse. In the first step, we need your help to identify relevant publications containing quality factors and related elements. If you are interested, contact us using the button below.
+    
+    .btn_container
+        a.btn.btn_fill(href="mailto:julian.frattini@bth.se?subject=Requirements Quality Factor Ontology") Contact the Team to the collaborative Community Effort
