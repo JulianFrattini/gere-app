@@ -68,9 +68,10 @@ exports.getGuideline = async(req, res, next) => {
     try {
         // obtain the current version to be displayed
         const currentversion = await getVersion(req);
-
+        const structure = structurehandler.getStructure();
+        
         res.render('structure/guideline', {
-            structure: structurehandler.getStructure()
+            structure: structure
         });
     } catch(error) {
         next(error)
@@ -176,7 +177,7 @@ setNewVersion = async function(req, vid) {
     // set the session version to this new version
     if(version != null) {
         req.session.version = version;
-        structurehandler.parseStructure(version.ontology, version.taxonomy);
+        await structurehandler.parseStructure(version.ontology, version.taxonomy);
     } else {
         console.error('No version found with key ' + vid);
     }
