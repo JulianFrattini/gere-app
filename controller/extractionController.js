@@ -11,8 +11,8 @@ module.exports = {
     },
 
     update: async function(req, res, next) {
-        await extractionparser.parseData()
+        const result = await extractionparser.parseData()
 
-        res.json({'result': 'ok'})
+        res.json({'success': result})
     }
 }

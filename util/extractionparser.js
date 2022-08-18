@@ -17,12 +17,18 @@ var awaitingfactors = {}
 module.exports = {
     parseData: async function() {
         // obtain and update all contributors
-        const contributorData = jsonp.readFile('contributors.json')
+        const contributorData = jsonp.readFile('contributors.json');
+        if(contributorData == null) {
+            return false;
+        }
         const contributors = await updateContributors(contributorData);
 
         // get all versions
         const allversions = await jsonp.parseFiles('versions');
         const allextractions = await jsonp.parseFilesToMap('extractions');
+        if(allversions == null || allextractions == null) {
+            return false;
+        }
 
         // determine, which versions have not yet been fully parsed
         await updateVersions(allversions, allextractions, contributors);

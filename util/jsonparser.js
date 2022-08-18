@@ -1,5 +1,5 @@
 const fs = require('fs')
-
+const path = require('path')
 
 const datapath = './data/raw/'
 
@@ -10,7 +10,13 @@ module.exports = {
             let json = JSON.parse(rawdata);
             return json;
         } else {
-            console.error('Cannot find tile ' + datapath + filename)
+            console.error('Cannot find the file ' + datapath + filename)
+            console.error('Files available in the root folder:')
+            fs.readdir(process.cwd(), function(err, files) {
+                files.forEach(function (file) {
+                    console.error(' - ' + file); 
+                });
+            });
         }
         return null;
     },
