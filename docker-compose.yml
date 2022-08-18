@@ -22,7 +22,7 @@ services:
         image: mongo
         restart: always
         volumes:
-        - './data:/data/db'
+        - './data/volume:/data/db'
         networks:
             rqfo:
                 ipv4_address: 172.25.0.2

@@ -10,13 +10,7 @@ module.exports = {
             let json = JSON.parse(rawdata);
             return json;
         } else {
-            console.error('Cannot find the file ' + datapath + filename)
-            console.error('Files available in the root folder:')
-            fs.readdir(process.cwd(), function(err, files) {
-                files.forEach(function (file) {
-                    console.error(' - ' + file); 
-                });
-            });
+            console.error('Cannot find the file ' + datapath + filename);
         }
         return null;
     },
