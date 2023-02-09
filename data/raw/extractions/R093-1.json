@@ -4,7 +4,7 @@
         "ID": "R093",
         "Refstring": "Mokammel, F., Coatan\u00e9a, E., Coatan\u00e9a, J., Nenchev, V., Blanco, E., & Pietola, M. (2018). Automatic requirements extraction, analysis, and graph representation using an approach derived from computational linguistics. Systems Engineering, 21(6), 555-575."
     },
-    "timestamp": "2022-02-24 10:00:00",
+    "timestamp": "2023-02-07 16:00:00",
     "factors": [
         {
             "id": "QF041",
@@ -122,8 +122,8 @@
             "ground truth annotators": "None",
             "size": 20,
             "granularity": "Requirement",
-            "accessibility": "Available in Paper",
-            "source link": ""
+            "accessibility": "Open Access",
+            "source link": "https://zenodo.org/record/7602827"
         },
         {
             "id": "DS18",
@@ -141,8 +141,8 @@
             "ground truth annotators": "None",
             "size": 66,
             "granularity": "Requirement",
-            "accessibility": "Broken Link",
-            "source link": "https://sites.google.com/a/digitaalinentuoteprosessi.fi/digitaalinentuoteprosessi/tutkimusprojektit/vamasu"
+            "accessibility": "Private",
+            "source link": ""
         },
         {
             "id": "DS19",
@@ -160,8 +160,8 @@
             "ground truth annotators": "None",
             "size": 152,
             "granularity": "Requirement",
-            "accessibility": "Broken Link",
-            "source link": "http://archived.naccho.org/topics/infrastructure/informatics/upload/OM_RSv1-0.pdf"
+            "accessibility": "Private",
+            "source link": ""
         }
     ],
     "approaches": [
