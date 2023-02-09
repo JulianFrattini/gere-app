@@ -2,8 +2,8 @@ extends ../layout
 
 block append head
     link(rel='stylesheet' href='/stylesheets/filterbox.css')
-    script(src='/scripts/toggleExpander.js')
-    script(src='/scripts/filter.js' subjects=`${JSON.stringify(factors)}` cycles=[{id: 'triple', values: {positive: structure.lists['aspect-characteristics'][1], negative: structure.lists['aspect-characteristics'][0], unknown: structure.lists['aspect-characteristics'][2]}}, {id: 'tuple', values: {positive: true, negative: false}}])
+    script(src='/scripts/toggleExpander.js' defer)
+    script(src='/scripts/filter.js' subjects=`${JSON.stringify(factors)}` cycles=[{id: 'triple', values: {positive: structure.lists['aspect-characteristics'][1], negative: structure.lists['aspect-characteristics'][0], unknown: structure.lists['aspect-characteristics'][2]}}, {id: 'tuple', values: {positive: true, negative: false}}] defer)
 
 block content
     h2 Factors
