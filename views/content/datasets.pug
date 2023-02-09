@@ -75,12 +75,14 @@ block content
                     td= ds.granularity
                     td= ds.origin
                     td= ds.groundtruthannotators
-                    if ['open access link', 'available in paper', 'reachable link'].includes(ds.accessibility)
+                    if ['open access link', 'open access'].includes(ds.accessibility)
+                        td.tc_excellent= ds.accessibility
+                    else if ['available in paper', 'reachable link', 'upon request'].includes(ds.accessibility)
                         td.tc_good= ds.accessibility
                     else if ds.accessibility == 'broken link'
                         td.tc_okay= ds.accessibility
                     else
-                        td.tc_bad= ds.accessibility
+                        td= ds.accessibility
                     td(title=ds.reference.citation) 
                         a(href=`/content/factors/${ds.reference._id}`)= ds.reference.refkey
                     td

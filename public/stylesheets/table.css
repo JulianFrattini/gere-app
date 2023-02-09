@@ -57,6 +57,10 @@ tbody>tr:hover {
     background: #f5f5f5;
 }
 
+.tc_excellent {
+    background-color: rgb(80, 182, 208);
+}
+
 .tc_good {
     background-color: rgb(146, 208, 80);
 }

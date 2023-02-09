@@ -87,7 +87,15 @@ block content
                             td.tc_good(title=`${release} has been disclosed`)
                         else 
                             td.tc_unknown(title=`${release} has not been disclosed`)
-                    td= ap.accessibility 
+
+                    if ['open access link', 'open access'].includes(ap.accessibility)
+                        td.tc_excellent= ap.accessibility 
+                    else if ['open source', 'open source link'].includes(ap.accessibility)
+                        td.tc_good= ap.accessibility 
+                    else if ['reachable link', 'upon request'].includes(ap.accessibility)
+                        td.tc_okay= ap.accessibility
+                    else
+                        td= ap.accessibility 
                     td 
                         if ap.sourcelink 
                             a(href=ap.sourcelink  target='blank') 

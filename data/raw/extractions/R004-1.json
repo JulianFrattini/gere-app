@@ -45,8 +45,8 @@
     ],
     "approaches": [
         {
-            "id": "A26",
-            "reference": "R004-1",
+            "id": "A26-1",
+            "reference": "R004",
             "descriptions": [
                 "D191"
             ],
