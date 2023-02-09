@@ -43,7 +43,6 @@ const schema = new mongoose.Schema({
     },
     accessibility: {
         type: String,
-        enum: ["available in paper", "open access link", "open access", "reachable link", "broken link", "no link", "upon request", "private"],
         required: true
     },
     sourcelink: {
